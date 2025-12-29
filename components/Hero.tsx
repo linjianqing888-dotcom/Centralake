@@ -8,7 +8,7 @@ interface Props {
 
 const Hero: React.FC<Props> = ({ content }) => {
   return (
-    <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+    <div className="relative h-[calc(100vh-84px)] w-full flex items-center justify-center overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
         style={{ backgroundImage: `url('${content.heroImageUrl}')` }}
@@ -24,10 +24,10 @@ const Hero: React.FC<Props> = ({ content }) => {
           {content.heroSubtitle}
         </p>
         <div className="flex justify-center gap-6">
-          <button className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium uppercase tracking-widest transition-all">
+          <button className="px-8 py-3 bg-[#00B36E] hover:bg-[#008f58] text-white font-medium uppercase tracking-widest transition-all rounded">
             Investment Strategy
           </button>
-          <button className="px-8 py-3 border border-white/30 hover:bg-white hover:text-black text-white font-medium uppercase tracking-widest transition-all">
+          <button className="px-8 py-3 border border-white/30 hover:bg-white hover:text-black text-white font-medium uppercase tracking-widest transition-all rounded">
             Recent Deals
           </button>
         </div>
@@ -36,19 +36,19 @@ const Hero: React.FC<Props> = ({ content }) => {
       <div className="absolute bottom-0 w-full bg-black/40 backdrop-blur-md border-t border-white/10 py-8 px-6 hidden lg:block">
         <div className="max-w-7xl mx-auto flex justify-around text-center">
           <div>
-            <div className="text-emerald-500 text-3xl font-bold">$12B+</div>
+            <div className="text-[#00B36E] text-3xl font-bold">$12B+</div>
             <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">AUM</div>
           </div>
           <div>
-            <div className="text-emerald-500 text-3xl font-bold">25+</div>
+            <div className="text-[#00B36E] text-3xl font-bold">25+</div>
             <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">Portfolio Companies</div>
           </div>
           <div>
-            <div className="text-emerald-500 text-3xl font-bold">150+</div>
+            <div className="text-[#00B36E] text-3xl font-bold">150+</div>
             <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">M&A Transactions</div>
           </div>
           <div>
-            <div className="text-emerald-500 text-3xl font-bold">15yrs</div>
+            <div className="text-[#00B36E] text-3xl font-bold">15yrs</div>
             <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">Firm Experience</div>
           </div>
         </div>

@@ -15,7 +15,6 @@ import Team from './components/Team.tsx';
 import Contact from './components/Contact.tsx';
 
 const App: React.FC = () => {
-  // 初始状态即赋予默认值，确保页面秒开
   const [state, setState] = useState<AppState>({
     currentUser: null,
     siteContent: INITIAL_CONTENT,
@@ -26,30 +25,26 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 封装静默刷新逻辑
   const silentRefresh = useCallback(async () => {
     try {
       const data = await ApiService.getAppState();
       setState(prev => ({
         ...data,
-        currentUser: prev.currentUser // 同步数据时保持当前的登录状态
+        currentUser: prev.currentUser
       }));
     } catch (error) {
-      console.warn("Background sync failed, using cached state.");
+      console.warn("Background sync failed.");
     }
   }, []);
 
-  // 初始挂载时静默同步一次云端数据
   useEffect(() => {
     silentRefresh();
   }, [silentRefresh]);
 
-  // 路由变化时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // 更新网站 Favicon
   useEffect(() => {
     if (state.siteContent.faviconUrl) {
       let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
@@ -91,12 +86,13 @@ const App: React.FC = () => {
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
-        onRefresh={silentRefresh} // Logo 点击时触发静默刷新
+        onRefresh={silentRefresh}
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
         onLogout={handleLogout} 
       />
       
-      <main className="animate-fadeIn">
+      {/* Increased padding-top to accommodate taller navbar (Top Bar + Main Nav) */}
+      <main className="animate-fadeIn pt-[84px]">
         <Routes>
           <Route path="/" element={<Hero content={state.siteContent} />} />
           <Route path="/strategy" element={<Strategy content={state.siteContent} />} />
