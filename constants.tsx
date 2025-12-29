@@ -9,7 +9,8 @@ export const COLORS = {
 };
 
 export const INITIAL_CONTENT: ContentData = {
-  logoUrl: "logo.png", // Default path, can be replaced via Media Library
+  // Using a placeholder that fits a PE firm aesthetic until the user uploads their own logo
+  logoUrl: "https://placehold.co/400x100/00b36e/ffffff?text=Centralake+Capital", 
   heroTitle: "Driving Transformation Through Strategic Capital",
   heroSubtitle: "Centralake Capital is a global private equity firm specializing in mid-market sector-leading companies.",
   aboutText: "Centralake Capital focuses on private equity and special situations. We partner with world-class management teams by providing patient, long-term capital.",

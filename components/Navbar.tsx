@@ -16,17 +16,18 @@ const Navbar: React.FC<Props> = ({ user, content, onNavigate, onLogout }) => {
         className="flex items-center cursor-pointer group"
         onClick={() => onNavigate('home')}
       >
-        <div className="flex items-center h-10">
+        <div className="flex items-center h-10 min-w-[120px]">
           <img 
             src={content.logoUrl} 
             alt="Centralake Capital" 
-            className="h-full w-auto object-contain"
+            className="h-full w-auto object-contain transition-opacity duration-300"
+            style={{ minHeight: '32px' }}
             onError={(e) => {
-              // Fallback if image fails
-              (e.target as HTMLImageElement).style.display = 'none';
+              // Instead of hiding, we can show a placeholder or text if the logo file is missing
+              const target = e.target as HTMLImageElement;
+              target.src = "https://placehold.co/200x50/00b36e/ffffff?text=Centralake";
             }}
           />
-          {/* Text span removed as requested */}
         </div>
       </div>
 
