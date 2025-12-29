@@ -4,10 +4,13 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    // 允许在前端代码中使用 process.env
+    'process.env': process.env
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    // 确保 index.html 即使在根目录也能被正确处理
     rollupOptions: {
       input: {
         main: './index.html',

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
 import { ApiService } from './services/api.ts';
 import Navbar from './components/Navbar.tsx';
@@ -14,8 +15,9 @@ import Contact from './components/Contact.tsx';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState | null>(null);
-  const [currentPage, setCurrentPage] = useState('home');
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const initData = async () => {
@@ -43,21 +45,16 @@ const App: React.FC = () => {
     }
   }, [state?.siteContent.faviconUrl]);
 
-  const navigateTo = (page: string) => {
-    setCurrentPage(page);
-    window.scrollTo(0, 0);
-  };
-
   const handleLogin = async (user: User) => {
     if (!state) return;
     setState({ ...state, currentUser: user });
-    navigateTo(user.role === 'admin' ? 'admin' : 'portal');
+    navigate(user.role === 'admin' ? '/admin' : '/portal');
   };
 
   const handleLogout = () => {
     if (!state) return;
     setState({ ...state, currentUser: null });
-    navigateTo('home');
+    navigate('/');
   };
 
   const handleUpdateContent = async (content: ContentData) => {
@@ -83,55 +80,49 @@ const App: React.FC = () => {
     );
   }
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <Hero content={state.siteContent} />;
-      case 'strategy':
-        return <Strategy content={state.siteContent} />;
-      case 'portfolio':
-        return <Portfolio content={state.siteContent} />;
-      case 'team':
-        return <Team content={state.siteContent} />;
-      case 'contact':
-        return <Contact onSubmit={handleContactSubmit} onNavigate={navigateTo} />;
-      case 'login':
-        return <LoginForm onLogin={handleLogin} content={state.siteContent} />;
-      case 'admin':
-        if (!state.currentUser || state.currentUser.role !== 'admin') {
-          return <LoginForm onLogin={handleLogin} content={state.siteContent} />;
-        }
-        return <AdminDashboard state={state} onUpdate={handleUpdateContent} />;
-      case 'portal':
-        if (!state.currentUser || state.currentUser.role !== 'client') {
-          return <LoginForm onLogin={handleLogin} content={state.siteContent} />;
-        }
-        const clientData = state.clients[state.currentUser.id];
-        return <ClientPortal user={state.currentUser} data={clientData} />;
-      default:
-        return <Hero content={state.siteContent} />;
-    }
-  };
+  const isAdmin = state.currentUser?.role === 'admin';
+  const isClient = state.currentUser?.role === 'client';
+  const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
     <div className="min-h-screen text-slate-200 bg-[#0a0a0a]">
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
-        onNavigate={navigateTo} 
+        onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
         onLogout={handleLogout} 
       />
       
       <main className="animate-fadeIn">
-        {renderPage()}
+        <Routes>
+          <Route path="/" element={<Hero content={state.siteContent} />} />
+          <Route path="/strategy" element={<Strategy content={state.siteContent} />} />
+          <Route path="/portfolio" element={<Portfolio content={state.siteContent} />} />
+          <Route path="/team" element={<Team content={state.siteContent} />} />
+          <Route path="/contact" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
+          <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state.siteContent} />} />
+          
+          <Route 
+            path="/admin" 
+            element={isAdmin ? <AdminDashboard state={state} onUpdate={handleUpdateContent} /> : <Navigate to="/login" />} 
+          />
+          
+          <Route 
+            path="/portal" 
+            element={isClient ? <ClientPortal user={state.currentUser!} data={state.clients[state.currentUser!.id]} /> : <Navigate to="/login" />} 
+          />
+          
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
       </main>
 
-      {(currentPage !== 'portal' && currentPage !== 'admin') && (
+      {!isSpecialPage && (
         <footer className="bg-white py-16 px-6 border-t border-slate-200">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
               <div className="flex flex-col gap-4">
-                <div className="flex items-center cursor-pointer h-12" onClick={() => navigateTo('home')}>
+                <div className="flex items-center cursor-pointer h-12" onClick={() => navigate('/')}>
                   <img src={state.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
                 </div>
                 <p className="text-slate-500 text-sm max-w-xs leading-relaxed mt-2">
@@ -142,14 +133,14 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
                 <div className="flex flex-col gap-4">
                   <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Firm</h4>
-                  <button onClick={() => navigateTo('home')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Overview</button>
-                  <button onClick={() => navigateTo('strategy')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Our Strategy</button>
-                  <button onClick={() => navigateTo('portfolio')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Portfolio</button>
+                  <button onClick={() => navigate('/')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Overview</button>
+                  <button onClick={() => navigate('/strategy')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Our Strategy</button>
+                  <button onClick={() => navigate('/portfolio')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Portfolio</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Access</h4>
-                  <button onClick={() => navigateTo('contact')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Contact Us</button>
-                  <button onClick={() => navigateTo('login')} className="text-[#00B36E] text-sm font-bold hover:underline text-left">Client Portal</button>
+                  <button onClick={() => navigate('/contact')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Contact Us</button>
+                  <button onClick={() => navigate('/login')} className="text-[#00B36E] text-sm font-bold hover:underline text-left">Client Portal</button>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Legal</h4>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centralake Capital</title>
+    <title>Centralake Capital | Private Equity Excellence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&family=Roboto+Slab:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -32,14 +32,6 @@
             min-height: 100vh;
         }
     </style>
-    <script>
-        // 模拟环境变量以便在浏览器中安全访问
-        window.process = {
-            env: {
-                API_KEY: "" 
-            }
-        };
-    </script>
 <script type="importmap">
 {
   "imports": {
@@ -48,15 +40,16 @@
     "react/": "https://esm.sh/react@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
     "@vercel/postgres": "https://esm.sh/@vercel/postgres@^0.10.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "@vercel/blob": "https://esm.sh/@vercel/blob@^2.0.0",
     "vite": "https://esm.sh/vite@^7.3.0",
-    "@vercel/blob": "https://esm.sh/@vercel/blob@^2.0.0"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

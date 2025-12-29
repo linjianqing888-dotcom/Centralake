@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ContactSubmission } from '../types.ts';
 
 interface Props {
@@ -7,7 +8,8 @@ interface Props {
   onNavigate: (page: string) => void;
 }
 
-const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
+const Contact: React.FC<Props> = ({ onSubmit }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,7 +55,7 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
         <h2 className="text-4xl font-serif text-white mb-4">Inquiry Securely Transmitted</h2>
         <p className="text-slate-400 mb-8 leading-relaxed">Your message has been encrypted and saved to our secure cloud database. A member of our relations team will reach out to <strong>{formData.email}</strong> shortly.</p>
         <button 
-          onClick={() => onNavigate('home')} 
+          onClick={() => navigate('/')} 
           className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-sm transition-all rounded shadow-lg shadow-emerald-900/40"
         >
           Return to Home
