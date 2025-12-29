@@ -1,16 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { AppState, User, ContentData, ContactSubmission } from './types';
-import { ApiService } from './services/api';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import AdminDashboard from './components/AdminDashboard';
-import ClientPortal from './components/ClientPortal';
-import LoginForm from './components/LoginForm';
-import Strategy from './components/Strategy';
-import Portfolio from './components/Portfolio';
-import Team from './components/Team';
-import Contact from './components/Contact';
+import { AppState, User, ContentData, ContactSubmission } from './types.ts';
+import { ApiService } from './services/api.ts';
+import Navbar from './components/Navbar.tsx';
+import Hero from './components/Hero.tsx';
+import AdminDashboard from './components/AdminDashboard.tsx';
+import ClientPortal from './components/ClientPortal.tsx';
+import LoginForm from './components/LoginForm.tsx';
+import Strategy from './components/Strategy.tsx';
+import Portfolio from './components/Portfolio.tsx';
+import Team from './components/Team.tsx';
+import Contact from './components/Contact.tsx';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState | null>(null);
@@ -19,9 +19,14 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initData = async () => {
-      const data = await ApiService.getAppState();
-      setState(data);
-      setIsLoading(false);
+      try {
+        const data = await ApiService.getAppState();
+        setState(data);
+      } catch (error) {
+        console.error("Failed to load state:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     initData();
   }, []);
@@ -116,7 +121,6 @@ const App: React.FC = () => {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center cursor-pointer h-12" onClick={() => navigateTo('home')}>
                   <img src={state.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
-                  {/* Text span removed */}
                 </div>
                 <p className="text-slate-500 text-sm max-w-xs leading-relaxed mt-2">
                   A premier private investment firm dedicated to long-term value creation through operational excellence and strategic capital deployment.
