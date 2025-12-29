@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ContentData, AppState } from '../types';
-import { ApiService } from '../services/api';
+import { ContentData, AppState } from '../types.ts';
+import { ApiService } from '../services/api.ts';
 
 interface Props {
   state: AppState;

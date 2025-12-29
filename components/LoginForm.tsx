@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, ContentData } from '../types';
+import { User, ContentData } from '../types.ts';
 import { ApiService } from '../services/api.ts';
 
 interface Props {

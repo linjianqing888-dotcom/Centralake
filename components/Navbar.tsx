@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, ContentData } from '../types';
+import { User, ContentData } from '../types.ts';
 
 interface Props {
   user: User | null;
@@ -23,7 +23,6 @@ const Navbar: React.FC<Props> = ({ user, content, onNavigate, onLogout }) => {
             className="h-full w-auto object-contain transition-opacity duration-300"
             style={{ minHeight: '32px' }}
             onError={(e) => {
-              // Instead of hiding, we can show a placeholder or text if the logo file is missing
               const target = e.target as HTMLImageElement;
               target.src = "https://placehold.co/200x50/00b36e/ffffff?text=Centralake";
             }}

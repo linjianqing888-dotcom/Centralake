@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ContentData } from '../types';
+import { ContentData } from '../types.ts';
 
 interface Props {
   content: ContentData;

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ContactSubmission } from '../types';
+import { ContactSubmission } from '../types.ts';
 
 interface Props {
   onSubmit: (submission: ContactSubmission) => Promise<void>;
@@ -20,7 +20,6 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Basic validation check though 'required' attribute handles most cases
     if (!formData.name || !formData.email || !formData.message) {
       alert("Please fill in all mandatory fields (Name, Email, Message).");
       return;

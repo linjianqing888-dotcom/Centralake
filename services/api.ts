@@ -1,6 +1,6 @@
 
-import { AppState, ContentData, ContactSubmission, User } from '../types';
-import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants';
+import { AppState, ContentData, ContactSubmission, User } from '../types.ts';
+import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants.tsx';
 
 const STORAGE_KEY = 'centralake_cloud_mock';
 const API_BASE = '/api'; 
