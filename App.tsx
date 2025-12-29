@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
 import { ApiService } from './services/api.ts';
+import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from './constants.tsx';
 import Navbar from './components/Navbar.tsx';
 import Hero from './components/Hero.tsx';
 import AdminDashboard from './components/AdminDashboard.tsx';
@@ -14,49 +15,43 @@ import Team from './components/Team.tsx';
 import Contact from './components/Contact.tsx';
 
 const App: React.FC = () => {
-  const [state, setState] = useState<AppState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // 初始状态即赋予默认值，确保页面秒开
+  const [state, setState] = useState<AppState>({
+    currentUser: null,
+    siteContent: INITIAL_CONTENT,
+    clients: MOCK_CLIENT_DATA,
+    contactSubmissions: [],
+  });
+  
   const navigate = useNavigate();
   const location = useLocation();
 
-  const refreshData = useCallback(async (showLoadingUI = false) => {
-    // 只有在明确要求显示加载UI，或者当前还没有任何数据时，才显示加载动画
-    if (showLoadingUI || !state) {
-      setIsLoading(true);
-    }
-
+  // 封装静默刷新逻辑
+  const silentRefresh = useCallback(async () => {
     try {
       const data = await ApiService.getAppState();
-      setState(prev => {
-        if (prev?.currentUser) {
-          return { ...data, currentUser: prev.currentUser };
-        }
-        return data;
-      });
+      setState(prev => ({
+        ...data,
+        currentUser: prev.currentUser // 同步数据时保持当前的登录状态
+      }));
     } catch (error) {
-      console.error("Failed to sync with cloud:", error);
-    } finally {
-      setIsLoading(false);
+      console.warn("Background sync failed, using cached state.");
     }
-  }, [state]);
-
-  // 初始加载：仅在挂载时运行一次
-  useEffect(() => {
-    const init = async () => {
-      const data = await ApiService.getAppState();
-      setState(data);
-      setIsLoading(false);
-    };
-    init();
   }, []);
 
-  // 路由变化时仅滚动到顶部，不触发刷新逻辑
+  // 初始挂载时静默同步一次云端数据
+  useEffect(() => {
+    silentRefresh();
+  }, [silentRefresh]);
+
+  // 路由变化时滚动到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // 更新网站 Favicon
   useEffect(() => {
-    if (state?.siteContent.faviconUrl) {
+    if (state.siteContent.faviconUrl) {
       let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
       if (!link) {
         link = document.createElement('link');
@@ -65,75 +60,59 @@ const App: React.FC = () => {
       }
       link.href = state.siteContent.faviconUrl;
     }
-  }, [state?.siteContent.faviconUrl]);
+  }, [state.siteContent.faviconUrl]);
 
   const handleLogin = async (user: User) => {
-    if (!state) return;
-    setState({ ...state, currentUser: user });
+    setState(prev => ({ ...prev, currentUser: user }));
     navigate(user.role === 'admin' ? '/admin' : '/portal');
   };
 
   const handleLogout = () => {
-    if (!state) return;
-    setState({ ...state, currentUser: null });
+    setState(prev => ({ ...prev, currentUser: null }));
     navigate('/');
   };
 
   const handleUpdateContent = async (content: ContentData) => {
-    if (!state) return;
     await ApiService.updateSiteContent(content);
-    setState({ ...state, siteContent: content });
+    setState(prev => ({ ...prev, siteContent: content }));
   };
 
   const handleContactSubmit = async (submission: ContactSubmission) => {
-    if (!state) return;
     const newState = await ApiService.saveContactSubmission(submission);
     setState(newState);
   };
 
-  // 全屏加载仅用于“完全没数据”的时刻
-  if (isLoading && !state) {
-    return (
-      <div className="h-screen bg-[#0a0a0a] flex items-center justify-center text-center">
-        <div>
-          <div className="w-12 h-12 border-2 border-[#00B36E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#00B36E] font-brand tracking-widest uppercase text-xs animate-pulse">Initializing Terminal...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const isAdmin = state?.currentUser?.role === 'admin';
-  const isClient = state?.currentUser?.role === 'client';
+  const isAdmin = state.currentUser?.role === 'admin';
+  const isClient = state.currentUser?.role === 'client';
   const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
     <div className="min-h-screen text-slate-200 bg-[#0a0a0a]">
       <Navbar 
-        user={state?.currentUser || null} 
-        content={state!.siteContent}
-        onRefresh={() => refreshData(false)} // 点击 Logo 时传 false，实现静默刷新
+        user={state.currentUser} 
+        content={state.siteContent}
+        onRefresh={silentRefresh} // Logo 点击时触发静默刷新
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
         onLogout={handleLogout} 
       />
       
       <main className="animate-fadeIn">
         <Routes>
-          <Route path="/" element={<Hero content={state!.siteContent} />} />
-          <Route path="/strategy" element={<Strategy content={state!.siteContent} />} />
-          <Route path="/portfolio" element={<Portfolio content={state!.siteContent} />} />
-          <Route path="/team" element={<Team content={state!.siteContent} />} />
+          <Route path="/" element={<Hero content={state.siteContent} />} />
+          <Route path="/strategy" element={<Strategy content={state.siteContent} />} />
+          <Route path="/portfolio" element={<Portfolio content={state.siteContent} />} />
+          <Route path="/team" element={<Team content={state.siteContent} />} />
           <Route path="/contact" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
-          <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state!.siteContent} />} />
+          <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state.siteContent} />} />
           
           <Route 
             path="/admin" 
-            element={isAdmin ? <AdminDashboard state={state!} onUpdate={handleUpdateContent} /> : <Navigate to="/login" />} 
+            element={isAdmin ? <AdminDashboard state={state} onUpdate={handleUpdateContent} /> : <Navigate to="/login" />} 
           />
           
           <Route 
             path="/portal" 
-            element={isClient ? <ClientPortal user={state!.currentUser!} data={state!.clients[state!.currentUser!.id]} /> : <Navigate to="/login" />} 
+            element={isClient ? <ClientPortal user={state.currentUser!} data={state.clients[state.currentUser!.id]} /> : <Navigate to="/login" />} 
           />
           
           <Route path="*" element={<Navigate to="/" />} />
@@ -146,7 +125,7 @@ const App: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center cursor-pointer h-12" onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                  <img src={state!.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
+                  <img src={state.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
                 </div>
                 <p className="text-slate-500 text-sm max-w-xs leading-relaxed mt-2">
                   A premier private investment firm dedicated to long-term value creation through operational excellence and strategic capital deployment.
