@@ -19,6 +19,11 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   useEffect(() => {
     const initData = async () => {
       try {
