@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
-import { ContentData, AppState } from '../types';
-import { generateFirmCopy } from '../services/gemini';
+import { ContentData, AppState } from '../types.ts';
+import { generateFirmCopy } from '../services/gemini.ts';
 
 interface Props {
   state: AppState;
@@ -13,7 +13,8 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
   const [activeTab, setActiveTab] = useState<'content' | 'media' | 'inquiries'>('content');
   const [isSaving, setIsSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const faviconInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     setIsSaving(true);
@@ -24,12 +25,12 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
     }, 1200);
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'faviconUrl') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setContent(prev => ({ ...prev, logoUrl: reader.result as string }));
+        setContent(prev => ({ ...prev, [field]: reader.result as string }));
       };
       reader.readAsDataURL(file);
     }
@@ -151,32 +152,59 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
           </div>
         )}
 
-        {activeTab === 'media' && (
-          <div className="animate-fadeIn">
+        {activeTab === 'media' && (activeTab === 'media') && (
+          <div className="animate-fadeIn space-y-8">
             <section className="bg-slate-900/40 p-10 rounded-2xl border border-white/5">
               <h3 className="text-emerald-500 font-serif text-lg mb-8">Brand Asset Management</h3>
-              <div className="flex flex-col md:flex-row gap-12 items-center">
+              
+              {/* Logo Upload Section */}
+              <div className="flex flex-col md:flex-row gap-12 items-center mb-12 border-b border-white/5 pb-12">
                 <div className="w-48 h-48 bg-black/50 border border-white/10 rounded-xl flex items-center justify-center overflow-hidden">
                   <img src={content.logoUrl} alt="Current Logo" className="max-h-32 w-auto object-contain" />
                 </div>
                 <div className="flex-1">
                   <h4 className="text-white font-medium mb-2">Corporate Identity (Logo)</h4>
                   <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                    Upload your official firm logo. This image will automatically update across the global navigation, 
-                    investor login portal, and legal footers.
+                    Upload your official firm logo. This image will update global navigation and the investor portal.
                   </p>
                   <input 
                     type="file" 
                     accept="image/*" 
                     className="hidden" 
-                    ref={fileInputRef}
-                    onChange={handleLogoUpload}
+                    ref={logoInputRef}
+                    onChange={(e) => handleFileUpload(e, 'logoUrl')}
                   />
                   <button 
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => logoInputRef.current?.click()}
                     className="px-6 py-3 border border-emerald-600/30 text-emerald-500 hover:bg-emerald-600 hover:text-white transition-all rounded text-xs font-bold uppercase tracking-widest"
                   >
-                    Upload New Logo Image
+                    Upload New Logo
+                  </button>
+                </div>
+              </div>
+
+              {/* Favicon Upload Section */}
+              <div className="flex flex-col md:flex-row gap-12 items-center">
+                <div className="w-32 h-32 bg-black/50 border border-white/10 rounded-xl flex items-center justify-center overflow-hidden">
+                  <img src={content.faviconUrl} alt="Current Favicon" className="w-8 h-8 object-contain" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-white font-medium mb-2">Browser Tab Icon (Favicon)</h4>
+                  <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+                    Upload the icon displayed in browser tabs. Recommended size: 32x32px or 64x64px.
+                  </p>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    ref={faviconInputRef}
+                    onChange={(e) => handleFileUpload(e, 'faviconUrl')}
+                  />
+                  <button 
+                    onClick={() => faviconInputRef.current?.click()}
+                    className="px-6 py-3 border border-emerald-600/30 text-emerald-500 hover:bg-emerald-600 hover:text-white transition-all rounded text-xs font-bold uppercase tracking-widest"
+                  >
+                    Upload New Favicon
                   </button>
                 </div>
               </div>

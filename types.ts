@@ -34,7 +34,8 @@ export interface ContactSubmission {
 }
 
 export interface ContentData {
-  logoUrl: string; // Added for Media Library support
+  logoUrl: string;
+  faviconUrl: string; // Added for Favicon support
   heroTitle: string;
   heroSubtitle: string;
   aboutText: string;

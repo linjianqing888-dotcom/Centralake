@@ -31,6 +31,19 @@ const App: React.FC = () => {
     initData();
   }, []);
 
+  // Effect to update browser favicon
+  useEffect(() => {
+    if (state?.siteContent.faviconUrl) {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = state.siteContent.faviconUrl;
+    }
+  }, [state?.siteContent.faviconUrl]);
+
   const navigateTo = (page: string) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
