@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, ClientData } from '../types';
+import { User, ClientData } from '../types.ts';
 
 interface Props {
   user: User;

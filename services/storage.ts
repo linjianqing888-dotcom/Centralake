@@ -1,6 +1,6 @@
 
-import { AppState, User, ContentData, ClientData, ContactSubmission } from '../types';
-import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants';
+import { AppState, User, ContentData, ClientData, ContactSubmission } from '../types.ts';
+import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants.tsx';
 
 const STORAGE_KEY = 'centralake_app_state';
 
