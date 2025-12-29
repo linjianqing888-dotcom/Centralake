@@ -1,16 +1,19 @@
 
-import { AppState, ContentData, ContactSubmission, User } from '../types';
-import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants';
-
-const STORAGE_KEY = 'centralake_cloud_mock';
+import { AppState, ContentData, ContactSubmission, User } from '../types.ts';
+import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants.tsx';
 
 /**
- * 这是一个模拟云端 API 的服务类。
- * 当您部署到 Vercel 并准备好真正的后端（如 Supabase 或 Vercel Postgres）时，
- * 只需在此处的 fetch() 调用中替换 URL 即可。
+ * PRODUCTION SETUP GUIDE for VERCEL:
+ * 
+ * 1. Database: Go to Vercel Dashboard -> Storage -> Create 'Postgres'.
+ * 2. Library: Install '@vercel/postgres' (requires build step).
+ * 3. Logic: Replace 'localStorage' logic with real 'fetch' calls to your API routes (/api/content).
+ * 
+ * For this browser-only demo, we use 'localStorage' to simulate persistence.
  */
+const STORAGE_KEY = 'centralake_cloud_mock';
+
 export const ApiService = {
-  // 模拟网络延迟，让交互更真实
   delay: (ms: number) => new Promise(res => setTimeout(res, ms)),
 
   async getAppState(): Promise<AppState> {
@@ -28,7 +31,8 @@ export const ApiService = {
   },
 
   async saveContactSubmission(submission: ContactSubmission): Promise<AppState> {
-    await this.delay(1200); // 模拟加密和网络传输
+    // REAL WORLD: await fetch('/api/inquiries', { method: 'POST', body: JSON.stringify(submission) });
+    await this.delay(1200); 
     const state = await this.getAppState();
     state.contactSubmissions = [submission, ...state.contactSubmissions];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -36,6 +40,7 @@ export const ApiService = {
   },
 
   async updateSiteContent(content: ContentData): Promise<void> {
+    // REAL WORLD: await fetch('/api/config', { method: 'PATCH', body: JSON.stringify(content) });
     await this.delay(1500);
     const state = await this.getAppState();
     state.siteContent = content;
@@ -44,7 +49,6 @@ export const ApiService = {
 
   async login(email: string, pass: string): Promise<User | null> {
     await this.delay(1000);
-    // 模拟身份验证逻辑
     if (email === 'admin@centralake.com' && pass === 'admin') {
       return { id: 'admin_1', email, name: 'Managing Partner', role: 'admin' };
     }
