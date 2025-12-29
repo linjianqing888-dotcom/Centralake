@@ -1,36 +1,26 @@
 
 import { put } from '@vercel/blob';
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(request: Request) {
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { 
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    });
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const filename = searchParams.get('filename') || `upload-${Date.now()}.png`;
+    const { filename } = req.query;
+    const finalFilename = filename || `upload-${Date.now()}.png`;
 
-    // The request body contains the binary file data
-    const blob = await put(filename, request.body as any, {
-      access: 'public', // Makes the file accessible via URL
+    // 在 Node.js Serverless 环境中，req 本身就是一个可读流
+    // @vercel/blob 的 put 方法可以直接接收流
+    const blob = await put(finalFilename, req, {
+      access: 'public',
     });
 
-    return new Response(JSON.stringify(blob), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json(blob);
   } catch (error: any) {
     console.error('Blob Upload Error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Upload failed' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    return res.status(500).json({ 
+      error: error.message || 'Upload failed' 
     });
   }
 }

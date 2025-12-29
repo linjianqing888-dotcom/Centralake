@@ -1,11 +1,7 @@
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler() {
-  return new Response(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
+export default async function handler(req: any, res: any) {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString() 
   });
 }
