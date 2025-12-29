@@ -17,7 +17,11 @@ export const ApiService = {
     }
   },
 
+  /**
+   * Uploads a file to Vercel Blob via our local API route
+   */
   async uploadImage(file: File): Promise<string> {
+    // We send the file directly as the body of the POST request
     const response = await fetch(`${API_BASE}/upload?filename=${encodeURIComponent(file.name)}`, {
       method: 'POST',
       body: file,
@@ -25,11 +29,11 @@ export const ApiService = {
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error || 'Upload failed');
+      throw new Error(err.error || 'Cloud storage upload failed');
     }
 
-    const blob = await response.json();
-    return blob.url; // Returns the permanent public Vercel Blob URL
+    const result = await response.json();
+    return result.url; // This is the public persistent URL (e.g., https://...public.blob.vercel-storage.com/...)
   },
 
   async initDatabase(): Promise<boolean> {

@@ -58,10 +58,12 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
 
     setUploadingField(field);
     try {
-      const url = await ApiService.uploadImage(file);
-      setContent(prev => ({ ...prev, [field]: url }));
+      // Direct call to Vercel Blob upload service
+      const permanentUrl = await ApiService.uploadImage(file);
+      setContent(prev => ({ ...prev, [field]: permanentUrl }));
     } catch (err: any) {
-      alert(`Upload failed: ${err.message}. Make sure Vercel Blob is enabled in your project storage dashboard.`);
+      console.error(err);
+      alert(`Cloud Upload Error: ${err.message}. Please ensure Vercel Blob is enabled in your Storage dashboard.`);
     } finally {
       setUploadingField(null);
     }
@@ -104,16 +106,120 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
             <h1 className="text-4xl font-serif text-white capitalize">{activeTab === 'sync' ? 'System' : activeTab === 'media' ? 'Media Library' : activeTab}</h1>
             <p className="text-slate-500 text-xs mt-2 uppercase tracking-widest">Centralake Administrative Console</p>
           </div>
-          <button 
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-[#00B36E] hover:bg-[#008f58] text-white px-10 py-4 rounded text-[10px] font-bold uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-emerald-900/20"
-          >
-            {isSaving ? 'Synchronizing...' : 'Deploy Changes'}
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-[#00B36E] hover:bg-[#008f58] text-white px-10 py-4 rounded text-[10px] font-bold uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-emerald-900/20"
+            >
+              {isSaving ? 'Synchronizing...' : 'Deploy Changes'}
+            </button>
+          </div>
         </header>
 
         <div className="max-w-5xl">
+          {activeTab === 'media' && (
+             <div className="space-y-12">
+              {/* Logo Section */}
+              <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
+                <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em]">Corporate Branding</h2>
+                  <span className="text-slate-600 text-[9px] font-mono">ID: logo_asset_01</span>
+                </div>
+                <div className="flex flex-col md:flex-row gap-10 items-start">
+                  <div className="w-full md:w-64 aspect-video bg-black/40 rounded-xl border border-white/10 flex items-center justify-center p-4 overflow-hidden relative group">
+                    <img src={content.logoUrl} alt="Logo Preview" className="max-h-full object-contain" />
+                    {uploadingField === 'logoUrl' && (
+                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                        <span className="text-[8px] text-emerald-500 font-bold uppercase">Syncing...</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-6">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Vercel Blob URL</label>
+                      <div className="relative group">
+                        <input 
+                          value={content.logoUrl} 
+                          readOnly
+                          className="w-full bg-black/20 border border-white/5 p-4 rounded-xl text-slate-400 text-[10px] outline-none font-mono pr-20"
+                        />
+                        <button 
+                          onClick={() => navigator.clipboard.writeText(content.logoUrl)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-[9px] font-bold uppercase tracking-tighter"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <input 
+                        type="file" 
+                        ref={logoInputRef}
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'logoUrl')}
+                      />
+                      <button 
+                        onClick={() => logoInputRef.current?.click()}
+                        disabled={!!uploadingField}
+                        className="bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-500 px-6 py-3 rounded text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 transition-all disabled:opacity-50"
+                      >
+                        {uploadingField === 'logoUrl' ? 'Processing...' : 'Replace Brand Asset'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hero Background Section */}
+              <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
+                <div className="flex justify-between items-start mb-6">
+                  <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em]">Immersive Visuals</h2>
+                  <span className="text-slate-600 text-[9px] font-mono">ID: hero_bg_asset_02</span>
+                </div>
+                <div className="space-y-8">
+                  <div className="w-full aspect-[21/9] bg-black/40 rounded-2xl border border-white/10 overflow-hidden relative">
+                    <img src={content.heroImageUrl} alt="Hero Preview" className="w-full h-full object-cover opacity-80" />
+                    {uploadingField === 'heroImageUrl' && (
+                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center backdrop-blur-sm">
+                         <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                         <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">Transferring to Vercel Storage...</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Permanent Asset URL</label>
+                      <input 
+                        value={content.heroImageUrl} 
+                        readOnly
+                        className="w-full bg-black/20 border border-white/5 p-4 rounded-xl text-slate-400 text-[10px] outline-none font-mono"
+                      />
+                    </div>
+                    <div className="flex flex-col justify-end">
+                      <input 
+                        type="file" 
+                        ref={heroInputRef}
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'heroImageUrl')}
+                      />
+                      <button 
+                        onClick={() => heroInputRef.current?.click()}
+                        disabled={!!uploadingField}
+                        className="w-full bg-[#00B36E] hover:bg-[#008f58] text-white px-6 py-4 rounded text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-emerald-900/10"
+                      >
+                        {uploadingField === 'heroImageUrl' ? 'Cloud Sync in Progress' : 'Upload High-Resolution Media'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'inquiries' && (
             <div className="bg-slate-900/20 rounded-3xl border border-white/5 overflow-hidden">
               <table className="w-full text-left">
@@ -139,7 +245,7 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                           <div className="text-slate-300 text-xs uppercase tracking-wider">{sub.company || '--'}</div>
                         </td>
                         <td className="px-8 py-8">
-                          <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-line line-clamp-3 hover:line-clamp-none transition-all cursor-help">
+                          <p className="text-slate-400 text-sm leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all cursor-help">
                             {sub.message}
                           </p>
                         </td>
@@ -151,93 +257,6 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                   )}
                 </tbody>
               </table>
-            </div>
-          )}
-
-          {activeTab === 'media' && (
-             <div className="space-y-12">
-              {/* Logo Section */}
-              <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
-                <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">Corporate Branding</h2>
-                <div className="flex flex-col md:flex-row gap-10 items-start">
-                  <div className="w-full md:w-64 aspect-video bg-black/40 rounded-xl border border-white/10 flex items-center justify-center p-4 overflow-hidden relative">
-                    <img src={content.logoUrl} alt="Logo Preview" className="max-h-full object-contain" />
-                    {uploadingField === 'logoUrl' && (
-                      <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-6">
-                    <div>
-                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Logo URL (Vercel Blob)</label>
-                      <input 
-                        value={content.logoUrl} 
-                        readOnly
-                        className="w-full bg-black/20 border border-white/5 p-4 rounded-xl text-slate-400 text-[10px] outline-none"
-                      />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <input 
-                        type="file" 
-                        ref={logoInputRef}
-                        className="hidden" 
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'logoUrl')}
-                      />
-                      <button 
-                        onClick={() => logoInputRef.current?.click()}
-                        disabled={!!uploadingField}
-                        className="bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-500 px-6 py-3 rounded text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 transition-all disabled:opacity-50"
-                      >
-                        {uploadingField === 'logoUrl' ? 'Uploading...' : 'Upload to Cloud'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Hero Background Section */}
-              <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
-                <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">Hero Visuals</h2>
-                <div className="space-y-8">
-                  <div className="w-full aspect-video bg-black/40 rounded-2xl border border-white/10 overflow-hidden relative group">
-                    <img src={content.heroImageUrl} alt="Hero Preview" className="w-full h-full object-cover opacity-80" />
-                    {uploadingField === 'heroImageUrl' && (
-                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center">
-                         <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                         <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Syncing to Cloud...</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Persistent Asset URL</label>
-                      <input 
-                        value={content.heroImageUrl} 
-                        readOnly
-                        className="w-full bg-black/20 border border-white/5 p-4 rounded-xl text-slate-400 text-[10px] outline-none"
-                      />
-                    </div>
-                    <div className="flex flex-col justify-end">
-                      <input 
-                        type="file" 
-                        ref={heroInputRef}
-                        className="hidden" 
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'heroImageUrl')}
-                      />
-                      <button 
-                        onClick={() => heroInputRef.current?.click()}
-                        disabled={!!uploadingField}
-                        className="w-full bg-[#00B36E] hover:bg-[#008f58] text-white px-6 py-4 rounded text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
-                      >
-                        {uploadingField === 'heroImageUrl' ? 'Processing...' : 'Upload High-Res Background'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

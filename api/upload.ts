@@ -7,16 +7,19 @@ export const config = {
 
 export default async function handler(request: Request) {
   if (request.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { 
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   try {
     const { searchParams } = new URL(request.url);
-    const filename = searchParams.get('filename') || 'upload.png';
+    const filename = searchParams.get('filename') || `upload-${Date.now()}.png`;
 
-    // The body will be the file buffer
+    // The request body contains the binary file data
     const blob = await put(filename, request.body as any, {
-      access: 'public',
+      access: 'public', // Makes the file accessible via URL
     });
 
     return new Response(JSON.stringify(blob), {
@@ -24,7 +27,8 @@ export default async function handler(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Blob Upload Error:', error);
+    return new Response(JSON.stringify({ error: error.message || 'Upload failed' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
