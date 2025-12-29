@@ -10,9 +10,10 @@ export const COLORS = {
 
 export const INITIAL_CONTENT: ContentData = {
   logoUrl: "https://placehold.co/400x100/00b36e/ffffff?text=Centralake+Capital", 
-  faviconUrl: "https://placehold.co/32x32/00b36e/ffffff?text=C", // Default favicon
+  faviconUrl: "https://placehold.co/32x32/00b36e/ffffff?text=C", 
   heroTitle: "Driving Transformation Through Strategic Capital",
   heroSubtitle: "Centralake Capital is a global private equity firm specializing in mid-market sector-leading companies.",
+  heroImageUrl: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=2070",
   aboutText: "Centralake Capital focuses on private equity and special situations. We partner with world-class management teams by providing patient, long-term capital.",
   strategyTitle: "Integrated Operational Value Creation",
   strategyText: "Our strategy is built upon a foundation of deep sector expertise and a repeatable playbook for operational improvement. We don't just invest capital; we invest in the infrastructure of growth.",

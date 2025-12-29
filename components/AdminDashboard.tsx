@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ContentData, AppState } from '../types.ts';
 import { ApiService } from '../services/api.ts';
 
@@ -14,6 +14,9 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [cloudConnected, setCloudConnected] = useState(false);
+  
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const heroInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const check = () => ApiService.isCloudConnected().then(setCloudConnected);
@@ -48,6 +51,18 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'heroImageUrl') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setContent(prev => ({ ...prev, [field]: base64String }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-[#050505] pt-16">
       <aside className="w-full md:w-72 bg-slate-950 border-r border-white/5 flex flex-col shrink-0">
@@ -62,13 +77,18 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
         </div>
 
         <nav className="p-4 space-y-1">
-          {['content', 'media', 'inquiries', 'sync'].map((t) => (
+          {[
+            { id: 'content', label: 'Content' },
+            { id: 'media', label: 'Media Library' },
+            { id: 'inquiries', label: 'Inquiries' },
+            { id: 'sync', label: 'System' }
+          ].map((t) => (
             <button 
-              key={t}
-              onClick={() => setActiveTab(t as any)} 
-              className={`w-full text-left px-6 py-4 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${activeTab === t ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]' : 'text-slate-500 hover:text-slate-300'}`}
+              key={t.id}
+              onClick={() => setActiveTab(t.id as any)} 
+              className={`w-full text-left px-6 py-4 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${activeTab === t.id ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]' : 'text-slate-500 hover:text-slate-300'}`}
             >
-              {t === 'sync' ? 'System' : t}
+              {t.label}
             </button>
           ))}
         </nav>
@@ -77,7 +97,7 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
       <main className="flex-1 p-8 md:p-16 overflow-y-auto">
         <header className="flex justify-between items-end mb-12">
           <div>
-            <h1 className="text-4xl font-serif text-white capitalize">{activeTab}</h1>
+            <h1 className="text-4xl font-serif text-white capitalize">{activeTab === 'sync' ? 'System' : activeTab === 'media' ? 'Media Library' : activeTab}</h1>
             <p className="text-slate-500 text-xs mt-2 uppercase tracking-widest">Centralake Administrative Console</p>
           </div>
           <button 
@@ -90,6 +110,84 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
         </header>
 
         <div className="max-w-4xl">
+          {activeTab === 'media' && (
+            <div className="space-y-12">
+              {/* Logo Section */}
+              <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
+                <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">Corporate Branding</h2>
+                <div className="flex flex-col md:flex-row gap-10 items-start">
+                  <div className="w-full md:w-64 aspect-video bg-black/40 rounded-xl border border-white/10 flex items-center justify-center p-4 overflow-hidden">
+                    <img src={content.logoUrl} alt="Logo Preview" className="max-h-full object-contain" />
+                  </div>
+                  <div className="flex-1 space-y-6">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Logo URL</label>
+                      <input 
+                        value={content.logoUrl} 
+                        onChange={e => setContent({...content, logoUrl: e.target.value})}
+                        className="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white text-xs outline-none focus:border-emerald-600"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <input 
+                        type="file" 
+                        ref={logoInputRef}
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'logoUrl')}
+                      />
+                      <button 
+                        onClick={() => logoInputRef.current?.click()}
+                        className="bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all"
+                      >
+                        Upload Local Logo
+                      </button>
+                      <p className="text-[10px] text-slate-600">Recommended: PNG with transparency, 400x100px</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hero Background Section */}
+              <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
+                <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">Hero Visuals</h2>
+                <div className="space-y-8">
+                  <div className="w-full aspect-video bg-black/40 rounded-2xl border border-white/10 overflow-hidden relative group">
+                    <img src={content.heroImageUrl} alt="Hero Preview" className="w-full h-full object-cover opacity-80" />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Background Image URL</label>
+                      <input 
+                        value={content.heroImageUrl} 
+                        onChange={e => setContent({...content, heroImageUrl: e.target.value})}
+                        className="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white text-xs outline-none focus:border-emerald-600"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="flex flex-col justify-end">
+                      <input 
+                        type="file" 
+                        ref={heroInputRef}
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'heroImageUrl')}
+                      />
+                      <button 
+                        onClick={() => heroInputRef.current?.click()}
+                        className="w-full bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all"
+                      >
+                        Upload New Background
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'sync' && (
             <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
               <h2 className="text-white font-serif text-2xl mb-6">Database Management</h2>

@@ -35,9 +35,10 @@ export interface ContactSubmission {
 
 export interface ContentData {
   logoUrl: string;
-  faviconUrl: string; // Added for Favicon support
+  faviconUrl: string;
   heroTitle: string;
   heroSubtitle: string;
+  heroImageUrl: string; // Added for Media management
   aboutText: string;
   strategyTitle: string;
   strategyText: string;

@@ -9,7 +9,10 @@ interface Props {
 const Hero: React.FC<Props> = ({ content }) => {
   return (
     <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=2070')] bg-cover bg-center">
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+        style={{ backgroundImage: `url('${content.heroImageUrl}')` }}
+      >
         <div className="absolute inset-0 bg-black/75"></div>
       </div>
 
