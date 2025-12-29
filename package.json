@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'No build step required for ESM-based frontend'"
+    "build": "echo 'Deploying static ESM frontend...'"
   },
   "dependencies": {
     "@vercel/blob": "^0.27.1",
