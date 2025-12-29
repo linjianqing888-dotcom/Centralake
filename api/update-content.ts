@@ -8,6 +8,10 @@ export default async function handler(req: any, res: any) {
 
   try {
     const data = req.body;
+    if (!data) {
+      return res.status(400).json({ error: 'Missing body data' });
+    }
+
     const client = await db.connect();
     
     // UPSERT pattern: insert or update if exists
@@ -20,7 +24,7 @@ export default async function handler(req: any, res: any) {
     
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Failed to update cloud storage' });
+    console.error('Update Error:', error);
+    return res.status(500).json({ error: 'Failed to update cloud storage', details: error instanceof Error ? error.message : String(error) });
   }
 }
