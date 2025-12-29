@@ -13,6 +13,7 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
   const [activeTab, setActiveTab] = useState<'content' | 'media' | 'inquiries' | 'sync'>('content');
   const [isSaving, setIsSaving] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [cloudConnected, setCloudConnected] = useState(false);
   
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -51,16 +52,19 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'heroImageUrl') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'heroImageUrl') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setContent(prev => ({ ...prev, [field]: base64String }));
-    };
-    reader.readAsDataURL(file);
+    setUploadingField(field);
+    try {
+      const url = await ApiService.uploadImage(file);
+      setContent(prev => ({ ...prev, [field]: url }));
+    } catch (err: any) {
+      alert(`Upload failed: ${err.message}. Make sure Vercel Blob is enabled in your project storage dashboard.`);
+    } finally {
+      setUploadingField(null);
+    }
   };
 
   return (
@@ -109,24 +113,68 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
           </button>
         </header>
 
-        <div className="max-w-4xl">
+        <div className="max-w-5xl">
+          {activeTab === 'inquiries' && (
+            <div className="bg-slate-900/20 rounded-3xl border border-white/5 overflow-hidden">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-black/40 text-[10px] uppercase text-slate-500 tracking-widest">
+                    <th className="px-8 py-6">Sender Details</th>
+                    <th className="px-8 py-6">Organization</th>
+                    <th className="px-8 py-6 w-1/3">Message</th>
+                    <th className="px-8 py-6 text-right">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {state.contactSubmissions.length === 0 ? (
+                    <tr><td colSpan={4} className="px-10 py-16 text-center text-slate-600 italic">No communication logs found in cloud storage.</td></tr>
+                  ) : (
+                    state.contactSubmissions.map(sub => (
+                      <tr key={sub.id} className="hover:bg-white/5 transition-colors group">
+                        <td className="px-8 py-8">
+                          <div className="text-white font-medium group-hover:text-emerald-400 transition-colors">{sub.name}</div>
+                          <div className="text-[10px] text-slate-500 font-mono mt-1">{sub.email}</div>
+                        </td>
+                        <td className="px-8 py-8">
+                          <div className="text-slate-300 text-xs uppercase tracking-wider">{sub.company || '--'}</div>
+                        </td>
+                        <td className="px-8 py-8">
+                          <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-line line-clamp-3 hover:line-clamp-none transition-all cursor-help">
+                            {sub.message}
+                          </p>
+                        </td>
+                        <td className="px-8 py-8 text-right">
+                          <div className="text-[10px] text-slate-600 font-mono">{sub.date}</div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           {activeTab === 'media' && (
-            <div className="space-y-12">
+             <div className="space-y-12">
               {/* Logo Section */}
               <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
                 <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">Corporate Branding</h2>
                 <div className="flex flex-col md:flex-row gap-10 items-start">
-                  <div className="w-full md:w-64 aspect-video bg-black/40 rounded-xl border border-white/10 flex items-center justify-center p-4 overflow-hidden">
+                  <div className="w-full md:w-64 aspect-video bg-black/40 rounded-xl border border-white/10 flex items-center justify-center p-4 overflow-hidden relative">
                     <img src={content.logoUrl} alt="Logo Preview" className="max-h-full object-contain" />
+                    {uploadingField === 'logoUrl' && (
+                      <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 space-y-6">
                     <div>
-                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Logo URL</label>
+                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Logo URL (Vercel Blob)</label>
                       <input 
                         value={content.logoUrl} 
-                        onChange={e => setContent({...content, logoUrl: e.target.value})}
-                        className="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white text-xs outline-none focus:border-emerald-600"
-                        placeholder="https://..."
+                        readOnly
+                        className="w-full bg-black/20 border border-white/5 p-4 rounded-xl text-slate-400 text-[10px] outline-none"
                       />
                     </div>
                     <div className="flex items-center gap-4">
@@ -139,11 +187,11 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                       />
                       <button 
                         onClick={() => logoInputRef.current?.click()}
-                        className="bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all"
+                        disabled={!!uploadingField}
+                        className="bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-500 px-6 py-3 rounded text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 transition-all disabled:opacity-50"
                       >
-                        Upload Local Logo
+                        {uploadingField === 'logoUrl' ? 'Uploading...' : 'Upload to Cloud'}
                       </button>
-                      <p className="text-[10px] text-slate-600">Recommended: PNG with transparency, 400x100px</p>
                     </div>
                   </div>
                 </div>
@@ -155,16 +203,20 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                 <div className="space-y-8">
                   <div className="w-full aspect-video bg-black/40 rounded-2xl border border-white/10 overflow-hidden relative group">
                     <img src={content.heroImageUrl} alt="Hero Preview" className="w-full h-full object-cover opacity-80" />
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all"></div>
+                    {uploadingField === 'heroImageUrl' && (
+                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center">
+                         <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                         <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest">Syncing to Cloud...</p>
+                      </div>
+                    )}
                   </div>
                   <div className="grid md:grid-cols-2 gap-8">
                     <div>
-                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Background Image URL</label>
+                      <label className="block text-[10px] text-slate-500 uppercase font-bold mb-2">Persistent Asset URL</label>
                       <input 
                         value={content.heroImageUrl} 
-                        onChange={e => setContent({...content, heroImageUrl: e.target.value})}
-                        className="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white text-xs outline-none focus:border-emerald-600"
-                        placeholder="https://..."
+                        readOnly
+                        className="w-full bg-black/20 border border-white/5 p-4 rounded-xl text-slate-400 text-[10px] outline-none"
                       />
                     </div>
                     <div className="flex flex-col justify-end">
@@ -177,13 +229,35 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                       />
                       <button 
                         onClick={() => heroInputRef.current?.click()}
-                        className="w-full bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all"
+                        disabled={!!uploadingField}
+                        className="w-full bg-[#00B36E] hover:bg-[#008f58] text-white px-6 py-4 rounded text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50"
                       >
-                        Upload New Background
+                        {uploadingField === 'heroImageUrl' ? 'Processing...' : 'Upload High-Res Background'}
                       </button>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'content' && (
+            <div className="space-y-6">
+              <div className="bg-slate-900/40 p-10 rounded-3xl border border-white/5">
+                <label className="block text-[10px] uppercase text-slate-500 mb-4 font-bold tracking-widest">Hero Narrative</label>
+                <input 
+                  value={content.heroTitle} 
+                  onChange={e => setContent({...content, heroTitle: e.target.value})} 
+                  className="w-full bg-black/40 border border-white/10 p-6 rounded-xl text-white mb-8 outline-none focus:border-emerald-600 text-xl font-serif" 
+                />
+                
+                <label className="block text-[10px] uppercase text-slate-500 mb-4 font-bold tracking-widest">Sub-Headline Text</label>
+                <textarea 
+                  rows={4} 
+                  value={content.heroSubtitle} 
+                  onChange={e => setContent({...content, heroSubtitle: e.target.value})} 
+                  className="w-full bg-black/40 border border-white/10 p-6 rounded-xl text-white outline-none focus:border-emerald-600 resize-none leading-relaxed" 
+                />
               </div>
             </div>
           )}
@@ -224,57 +298,6 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                   />
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'content' && (
-            <div className="space-y-6">
-              <div className="bg-slate-900/40 p-10 rounded-3xl border border-white/5">
-                <label className="block text-[10px] uppercase text-slate-500 mb-4 font-bold tracking-widest">Hero Narrative</label>
-                <input 
-                  value={content.heroTitle} 
-                  onChange={e => setContent({...content, heroTitle: e.target.value})} 
-                  className="w-full bg-black/40 border border-white/10 p-6 rounded-xl text-white mb-8 outline-none focus:border-emerald-600 text-xl font-serif" 
-                />
-                
-                <label className="block text-[10px] uppercase text-slate-500 mb-4 font-bold tracking-widest">Sub-Headline Text</label>
-                <textarea 
-                  rows={4} 
-                  value={content.heroSubtitle} 
-                  onChange={e => setContent({...content, heroSubtitle: e.target.value})} 
-                  className="w-full bg-black/40 border border-white/10 p-6 rounded-xl text-white outline-none focus:border-emerald-600 resize-none leading-relaxed" 
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'inquiries' && (
-            <div className="bg-slate-900/20 rounded-3xl border border-white/5 overflow-hidden">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-black/40 text-[10px] uppercase text-slate-500 tracking-widest">
-                    <th className="px-10 py-6">Origin</th>
-                    <th className="px-10 py-6">Message Excerpt</th>
-                    <th className="px-10 py-6">Timestamp</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {state.contactSubmissions.length === 0 ? (
-                    <tr><td colSpan={3} className="px-10 py-16 text-center text-slate-600 italic">No communication logs found.</td></tr>
-                  ) : (
-                    state.contactSubmissions.map(sub => (
-                      <tr key={sub.id} className="hover:bg-white/5 transition-colors">
-                        <td className="px-10 py-8">
-                          <div className="text-white font-medium">{sub.name}</div>
-                          <div className="text-[10px] text-slate-500 uppercase">{sub.company || 'Private Individual'}</div>
-                        </td>
-                        <td className="px-10 py-8 text-slate-400 text-sm max-w-xs truncate">{sub.message}</td>
-                        <td className="px-10 py-8 text-[10px] text-slate-600 font-mono">{sub.date}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
             </div>
           )}
         </div>

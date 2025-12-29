@@ -17,6 +17,21 @@ export const ApiService = {
     }
   },
 
+  async uploadImage(file: File): Promise<string> {
+    const response = await fetch(`${API_BASE}/upload?filename=${encodeURIComponent(file.name)}`, {
+      method: 'POST',
+      body: file,
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Upload failed');
+    }
+
+    const blob = await response.json();
+    return blob.url; // Returns the permanent public Vercel Blob URL
+  },
+
   async initDatabase(): Promise<boolean> {
     try {
       const res = await fetch(`${API_BASE}/init-db`);

@@ -20,6 +20,12 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Basic validation check though 'required' attribute handles most cases
+    if (!formData.name || !formData.email || !formData.message) {
+      alert("Please fill in all mandatory fields (Name, Email, Message).");
+      return;
+    }
+
     setIsSubmitting(true);
     
     const submission: ContactSubmission = {
@@ -28,10 +34,15 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
       date: new Date().toLocaleString()
     };
     
-    await onSubmit(submission);
-    setIsSubmitting(false);
-    setSubmitted(true);
-    window.scrollTo(0, 0);
+    try {
+      await onSubmit(submission);
+      setSubmitted(true);
+      window.scrollTo(0, 0);
+    } catch (error) {
+      alert("Transmission error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -41,7 +52,7 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
           <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
         </div>
         <h2 className="text-4xl font-serif text-white mb-4">Inquiry Securely Transmitted</h2>
-        <p className="text-slate-400 mb-8 leading-relaxed">Your message has been encrypted and saved to our secure cloud database. A member of our relations team will reach out shortly.</p>
+        <p className="text-slate-400 mb-8 leading-relaxed">Your message has been encrypted and saved to our secure cloud database. A member of our relations team will reach out to <strong>{formData.email}</strong> shortly.</p>
         <button 
           onClick={() => onNavigate('home')} 
           className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-widest text-sm transition-all rounded shadow-lg shadow-emerald-900/40"
@@ -69,7 +80,7 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
               </div>
               <div>
                 <h4 className="text-white font-medium mb-1 uppercase text-[10px] tracking-widest">End-to-End Security</h4>
-                <p className="text-slate-500 text-xs">All contact data is stored indefinitely in our high-redundancy database cluster.</p>
+                <p className="text-slate-500 text-xs">All contact data, including your email and message, is stored indefinitely in our high-redundancy database cluster.</p>
               </div>
             </div>
           </div>
@@ -86,7 +97,9 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">Name</label>
+                <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">
+                  Name <span className="text-red-500">*</span>
+                </label>
                 <input 
                   required
                   value={formData.name}
@@ -96,7 +109,9 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">Email</label>
+                <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">
+                  Email <span className="text-red-500">*</span>
+                </label>
                 <input 
                   type="email"
                   required
@@ -108,7 +123,7 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
               </div>
             </div>
             <div>
-              <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">Organization</label>
+              <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">Organization (Optional)</label>
               <input 
                 value={formData.company}
                 onChange={e => setFormData({...formData, company: e.target.value})}
@@ -117,14 +132,16 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">Message</label>
+              <label className="block text-[10px] uppercase text-emerald-500 mb-2 tracking-widest font-bold">
+                Message <span className="text-red-500">*</span>
+              </label>
               <textarea 
                 required
                 rows={5}
                 value={formData.message}
                 onChange={e => setFormData({...formData, message: e.target.value})}
                 className="w-full bg-black/50 border border-white/10 p-4 rounded text-white focus:border-emerald-600 outline-none resize-none transition-colors"
-                placeholder="Secure inquiry text..."
+                placeholder="Please describe your inquiry details..."
               />
             </div>
             <button 
@@ -134,6 +151,9 @@ const Contact: React.FC<Props> = ({ onSubmit, onNavigate }) => {
             >
               Submit to Secure Portal
             </button>
+            <p className="text-[9px] text-slate-600 text-center uppercase tracking-widest">
+              * Required fields for institutional verification
+            </p>
           </form>
         </div>
       </div>
