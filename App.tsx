@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
 import { ApiService } from './services/api.ts';
@@ -19,24 +19,36 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const refreshData = useCallback(async (showLoading = true) => {
+    if (showLoading) setIsLoading(true);
+    try {
+      const data = await ApiService.getAppState();
+      setState(prev => {
+        // Preserve current user session if it exists during refresh
+        if (prev?.currentUser) {
+          return { ...data, currentUser: prev.currentUser };
+        }
+        return data;
+      });
+    } catch (error) {
+      console.error("Failed to sync with cloud:", error);
+    } finally {
+      if (showLoading) {
+        // Add a slight delay for better UX "feeling" of refresh
+        setTimeout(() => setIsLoading(false), 600);
+      }
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
   // Scroll to top on every route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
-
-  useEffect(() => {
-    const initData = async () => {
-      try {
-        const data = await ApiService.getAppState();
-        setState(data);
-      } catch (error) {
-        console.error("Failed to load state:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initData();
-  }, []);
 
   useEffect(() => {
     if (state?.siteContent.faviconUrl) {
@@ -79,7 +91,7 @@ const App: React.FC = () => {
       <div className="h-screen bg-[#0a0a0a] flex items-center justify-center text-center">
         <div>
           <div className="w-12 h-12 border-2 border-[#00B36E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#00B36E] font-brand tracking-widest uppercase text-xs">Initializing Terminal...</p>
+          <p className="text-[#00B36E] font-brand tracking-widest uppercase text-xs animate-pulse">Synchronizing Cloud Data...</p>
         </div>
       </div>
     );
@@ -94,6 +106,7 @@ const App: React.FC = () => {
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
+        onRefresh={() => refreshData(true)}
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
         onLogout={handleLogout} 
       />
@@ -127,7 +140,7 @@ const App: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
               <div className="flex flex-col gap-4">
-                <div className="flex items-center cursor-pointer h-12" onClick={() => navigate('/')}>
+                <div className="flex items-center cursor-pointer h-12" onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); refreshData(true); }}>
                   <img src={state.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
                 </div>
                 <p className="text-slate-500 text-sm max-w-xs leading-relaxed mt-2">
@@ -138,7 +151,7 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
                 <div className="flex flex-col gap-4">
                   <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Firm</h4>
-                  <button onClick={() => navigate('/')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Overview</button>
+                  <button onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Overview</button>
                   <button onClick={() => navigate('/strategy')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Our Strategy</button>
                   <button onClick={() => navigate('/portfolio')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Portfolio</button>
                 </div>

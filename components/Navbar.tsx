@@ -1,22 +1,33 @@
 
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { User, ContentData } from '../types.ts';
 
 interface Props {
   user: User | null;
   content: ContentData;
+  onRefresh: () => void;
   onNavigate: (page: string) => void;
   onLogout: () => void;
 }
 
-const Navbar: React.FC<Props> = ({ user, content, onNavigate, onLogout }) => {
+const Navbar: React.FC<Props> = ({ user, content, onRefresh, onLogout }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      onRefresh();
+    }
+  };
 
   return (
     <nav className="fixed w-full z-50 bg-white border-b border-slate-100 px-8 py-4 flex justify-between items-center shadow-sm">
       <Link 
         to="/"
+        onClick={handleLogoClick}
         className="flex items-center group"
       >
         <div className="flex items-center h-10 min-w-[120px]">
