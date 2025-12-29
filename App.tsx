@@ -19,12 +19,15 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const refreshData = useCallback(async (showLoading = true) => {
-    if (showLoading) setIsLoading(true);
+  const refreshData = useCallback(async (showLoadingUI = false) => {
+    // 只有在明确要求显示加载UI，或者当前还没有任何数据时，才显示加载动画
+    if (showLoadingUI || !state) {
+      setIsLoading(true);
+    }
+
     try {
       const data = await ApiService.getAppState();
       setState(prev => {
-        // Preserve current user session if it exists during refresh
         if (prev?.currentUser) {
           return { ...data, currentUser: prev.currentUser };
         }
@@ -33,19 +36,21 @@ const App: React.FC = () => {
     } catch (error) {
       console.error("Failed to sync with cloud:", error);
     } finally {
-      if (showLoading) {
-        // Add a slight delay for better UX "feeling" of refresh
-        setTimeout(() => setIsLoading(false), 600);
-      }
+      setIsLoading(false);
     }
+  }, [state]);
+
+  // 初始加载：仅在挂载时运行一次
+  useEffect(() => {
+    const init = async () => {
+      const data = await ApiService.getAppState();
+      setState(data);
+      setIsLoading(false);
+    };
+    init();
   }, []);
 
-  // Initial load
-  useEffect(() => {
-    refreshData();
-  }, [refreshData]);
-
-  // Scroll to top on every route change
+  // 路由变化时仅滚动到顶部，不触发刷新逻辑
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -86,51 +91,51 @@ const App: React.FC = () => {
     setState(newState);
   };
 
-  if (isLoading || !state) {
+  // 全屏加载仅用于“完全没数据”的时刻
+  if (isLoading && !state) {
     return (
       <div className="h-screen bg-[#0a0a0a] flex items-center justify-center text-center">
         <div>
           <div className="w-12 h-12 border-2 border-[#00B36E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#00B36E] font-brand tracking-widest uppercase text-xs animate-pulse">Synchronizing Cloud Data...</p>
+          <p className="text-[#00B36E] font-brand tracking-widest uppercase text-xs animate-pulse">Initializing Terminal...</p>
         </div>
       </div>
     );
   }
 
-  const isAdmin = state.currentUser?.role === 'admin';
-  const isClient = state.currentUser?.role === 'client';
+  const isAdmin = state?.currentUser?.role === 'admin';
+  const isClient = state?.currentUser?.role === 'client';
   const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
     <div className="min-h-screen text-slate-200 bg-[#0a0a0a]">
       <Navbar 
-        user={state.currentUser} 
-        content={state.siteContent}
-        onRefresh={() => refreshData(true)}
+        user={state?.currentUser || null} 
+        content={state!.siteContent}
+        onRefresh={() => refreshData(false)} // 点击 Logo 时传 false，实现静默刷新
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
         onLogout={handleLogout} 
       />
       
       <main className="animate-fadeIn">
         <Routes>
-          <Route path="/" element={<Hero content={state.siteContent} />} />
-          <Route path="/strategy" element={<Strategy content={state.siteContent} />} />
-          <Route path="/portfolio" element={<Portfolio content={state.siteContent} />} />
-          <Route path="/team" element={<Team content={state.siteContent} />} />
+          <Route path="/" element={<Hero content={state!.siteContent} />} />
+          <Route path="/strategy" element={<Strategy content={state!.siteContent} />} />
+          <Route path="/portfolio" element={<Portfolio content={state!.siteContent} />} />
+          <Route path="/team" element={<Team content={state!.siteContent} />} />
           <Route path="/contact" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
-          <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state.siteContent} />} />
+          <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state!.siteContent} />} />
           
           <Route 
             path="/admin" 
-            element={isAdmin ? <AdminDashboard state={state} onUpdate={handleUpdateContent} /> : <Navigate to="/login" />} 
+            element={isAdmin ? <AdminDashboard state={state!} onUpdate={handleUpdateContent} /> : <Navigate to="/login" />} 
           />
           
           <Route 
             path="/portal" 
-            element={isClient ? <ClientPortal user={state.currentUser!} data={state.clients[state.currentUser!.id]} /> : <Navigate to="/login" />} 
+            element={isClient ? <ClientPortal user={state!.currentUser!} data={state!.clients[state!.currentUser!.id]} /> : <Navigate to="/login" />} 
           />
           
-          {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
@@ -140,8 +145,8 @@ const App: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
               <div className="flex flex-col gap-4">
-                <div className="flex items-center cursor-pointer h-12" onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); refreshData(true); }}>
-                  <img src={state.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
+                <div className="flex items-center cursor-pointer h-12" onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <img src={state!.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
                 </div>
                 <p className="text-slate-500 text-sm max-w-xs leading-relaxed mt-2">
                   A premier private investment firm dedicated to long-term value creation through operational excellence and strategic capital deployment.
