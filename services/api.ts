@@ -1,6 +1,6 @@
 
-import { AppState, ContentData, ContactSubmission, User } from '../types.ts';
-import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants.tsx';
+import { AppState, ContentData, ContactSubmission, User } from '../types';
+import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants';
 
 const STORAGE_KEY = 'centralake_cloud_mock';
 const API_BASE = '/api'; 
@@ -17,11 +17,7 @@ export const ApiService = {
     }
   },
 
-  /**
-   * Uploads a file to Vercel Blob via our local API route
-   */
   async uploadImage(file: File): Promise<string> {
-    // We send the file directly as the body of the POST request
     const response = await fetch(`${API_BASE}/upload?filename=${encodeURIComponent(file.name)}`, {
       method: 'POST',
       body: file,
@@ -33,7 +29,7 @@ export const ApiService = {
     }
 
     const result = await response.json();
-    return result.url; // This is the public persistent URL (e.g., https://...public.blob.vercel-storage.com/...)
+    return result.url;
   },
 
   async initDatabase(): Promise<boolean> {

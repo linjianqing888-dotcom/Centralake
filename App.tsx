@@ -1,16 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { AppState, User, ContentData, ContactSubmission } from './types.ts';
-import { ApiService } from './services/api.ts';
-import Navbar from './components/Navbar.tsx';
-import Hero from './components/Hero.tsx';
-import AdminDashboard from './components/AdminDashboard.tsx';
-import ClientPortal from './components/ClientPortal.tsx';
-import LoginForm from './components/LoginForm.tsx';
-import Strategy from './components/Strategy.tsx';
-import Portfolio from './components/Portfolio.tsx';
-import Team from './components/Team.tsx';
-import Contact from './components/Contact.tsx';
+import { AppState, User, ContentData, ContactSubmission } from './types';
+import { ApiService } from './services/api';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import AdminDashboard from './components/AdminDashboard';
+import ClientPortal from './components/ClientPortal';
+import LoginForm from './components/LoginForm';
+import Strategy from './components/Strategy';
+import Portfolio from './components/Portfolio';
+import Team from './components/Team';
+import Contact from './components/Contact';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState | null>(null);
@@ -31,7 +31,6 @@ const App: React.FC = () => {
     initData();
   }, []);
 
-  // Effect to update browser favicon
   useEffect(() => {
     if (state?.siteContent.faviconUrl) {
       let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");

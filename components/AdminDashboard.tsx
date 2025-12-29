@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ContentData, AppState } from '../types.ts';
-import { ApiService } from '../services/api.ts';
+import { ContentData, AppState } from '../types';
+import { ApiService } from '../services/api';
 
 interface Props {
   state: AppState;
@@ -58,7 +58,6 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
 
     setUploadingField(field);
     try {
-      // Direct call to Vercel Blob upload service
       const permanentUrl = await ApiService.uploadImage(file);
       setContent(prev => ({ ...prev, [field]: permanentUrl }));
     } catch (err: any) {
@@ -120,7 +119,6 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
         <div className="max-w-5xl">
           {activeTab === 'media' && (
              <div className="space-y-12">
-              {/* Logo Section */}
               <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
                 <div className="flex justify-between items-start mb-6">
                   <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em]">Corporate Branding</h2>
@@ -173,7 +171,6 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
                 </div>
               </div>
 
-              {/* Hero Background Section */}
               <div className="bg-slate-900/40 border border-white/5 p-10 rounded-3xl">
                 <div className="flex justify-between items-start mb-6">
                   <h2 className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em]">Immersive Visuals</h2>
