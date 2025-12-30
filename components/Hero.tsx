@@ -8,50 +8,49 @@ interface Props {
 
 const Hero: React.FC<Props> = ({ content }) => {
   return (
-    <div className="relative h-[calc(100vh-84px)] w-full flex items-center justify-center overflow-hidden">
+    <div className="relative h-screen w-full flex items-end overflow-hidden">
+      {/* Background Image with Silver Lake Style Gradient Overlays */}
       <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105"
         style={{ backgroundImage: `url('${content.heroImageUrl}')` }}
       >
-        <div className="absolute inset-0 bg-black/75"></div>
+        {/* Top shadow for nav readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent"></div>
+        {/* Bottom shadow for text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
       </div>
 
-      <div className="relative z-10 max-w-5xl px-6 text-center">
-        <h1 className="text-5xl md:text-7xl font-serif text-white mb-8 leading-tight">
-          {content.heroTitle}
-        </h1>
-        <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-          {content.heroSubtitle}
-        </p>
-        <div className="flex justify-center gap-6">
-          <button className="px-8 py-3 bg-[#00B36E] hover:bg-[#008f58] text-white font-medium uppercase tracking-widest transition-all rounded">
-            Investment Strategy
-          </button>
-          <button className="px-8 py-3 border border-white/30 hover:bg-white hover:text-black text-white font-medium uppercase tracking-widest transition-all rounded">
-            Recent Deals
+      {/* Content Area - Bottom Left aligned like screenshot */}
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-12 pb-24 animate-fadeIn">
+        <div className="max-w-3xl">
+          {/* Subtitle / Label with double slash */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-[#00A3FF] text-xl font-bold tracking-tighter">//</span>
+            <span className="text-white text-xs md:text-sm font-bold uppercase tracking-[0.3em]">
+              {content.heroSubtitle}
+            </span>
+          </div>
+
+          {/* Main Title - Serif and Impactful */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white mb-10 leading-[1.1] tracking-tight">
+            {content.heroTitle}
+          </h1>
+
+          {/* Learn More Action */}
+          <button className="group flex items-center gap-4 text-white hover:text-[#00A3FF] transition-all duration-300">
+            <span className="text-[11px] font-bold uppercase tracking-[0.3em]">Learn More</span>
+            <div className="w-10 h-10 border border-white/30 rounded-full flex items-center justify-center group-hover:border-[#00A3FF] group-hover:bg-[#00A3FF]/10 transition-all">
+              <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </div>
           </button>
         </div>
       </div>
 
-      <div className="absolute bottom-0 w-full bg-black/40 backdrop-blur-md border-t border-white/10 py-8 px-6 hidden lg:block">
-        <div className="max-w-7xl mx-auto flex justify-around text-center">
-          <div>
-            <div className="text-[#00B36E] text-3xl font-bold">$12B+</div>
-            <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">AUM</div>
-          </div>
-          <div>
-            <div className="text-[#00B36E] text-3xl font-bold">25+</div>
-            <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">Portfolio Companies</div>
-          </div>
-          <div>
-            <div className="text-[#00B36E] text-3xl font-bold">150+</div>
-            <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">M&A Transactions</div>
-          </div>
-          <div>
-            <div className="text-[#00B36E] text-3xl font-bold">15yrs</div>
-            <div className="text-slate-400 text-xs uppercase tracking-widest mt-1">Firm Experience</div>
-          </div>
-        </div>
+      {/* Floating Status Indicator (Optional but adds to the high-end feel) */}
+      <div className="absolute right-12 bottom-24 hidden xl:block">
+        <div className="w-5 h-5 border-2 border-[#00A3FF] rounded-full animate-pulse"></div>
       </div>
     </div>
   );

@@ -45,18 +45,6 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (state.siteContent.faviconUrl) {
-      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.getElementsByTagName('head')[0].appendChild(link);
-      }
-      link.href = state.siteContent.faviconUrl;
-    }
-  }, [state.siteContent.faviconUrl]);
-
   const handleLogin = async (user: User) => {
     setState(prev => ({ ...prev, currentUser: user }));
     navigate(user.role === 'admin' ? '/admin' : '/portal');
@@ -82,7 +70,7 @@ const App: React.FC = () => {
   const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
-    <div className="min-h-screen text-slate-200 bg-[#0a0a0a]">
+    <div className="min-h-screen text-slate-200 bg-[#050505]">
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
@@ -91,8 +79,8 @@ const App: React.FC = () => {
         onLogout={handleLogout} 
       />
       
-      {/* Increased padding-top to accommodate taller navbar (Top Bar + Main Nav) */}
-      <main className="animate-fadeIn pt-[84px]">
+      {/* Remove pt-[84px] because Navbar is now overlaying on Hero */}
+      <main className="animate-fadeIn">
         <Routes>
           <Route path="/" element={<Hero content={state.siteContent} />} />
           <Route path="/strategy" element={<Strategy content={state.siteContent} />} />
@@ -116,43 +104,39 @@ const App: React.FC = () => {
       </main>
 
       {!isSpecialPage && (
-        <footer className="bg-white py-16 px-6 border-t border-slate-200">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center cursor-pointer h-12" onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                  <img src={state.siteContent.logoUrl} alt="Logo" className="h-full w-auto object-contain" />
-                </div>
-                <p className="text-slate-500 text-sm max-w-xs leading-relaxed mt-2">
-                  A premier private investment firm dedicated to long-term value creation through operational excellence and strategic capital deployment.
+        <footer className="bg-white py-20 px-12 border-t border-slate-200">
+          <div className="max-w-[1600px] mx-auto">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-20 mb-20">
+              <div className="flex flex-col gap-8 max-w-sm">
+                <span className="text-[#002147] text-3xl font-bold uppercase tracking-tighter font-serif">Centralake</span>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  Leading the global technology investment landscape through innovative capital solutions and deep operational partnership.
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
-                <div className="flex flex-col gap-4">
-                  <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Firm</h4>
-                  <button onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Overview</button>
-                  <button onClick={() => navigate('/strategy')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Our Strategy</button>
-                  <button onClick={() => navigate('/portfolio')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Portfolio</button>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-20">
+                <div className="flex flex-col gap-5">
+                  <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Insights</h4>
+                  <button onClick={() => navigate('/strategy')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">Strategy</button>
+                  <button onClick={() => navigate('/portfolio')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">Portfolio</button>
                 </div>
-                <div className="flex flex-col gap-4">
-                  <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Access</h4>
-                  <button onClick={() => navigate('/contact')} className="text-slate-500 text-sm hover:text-[#00B36E] text-left">Contact Us</button>
-                  <button onClick={() => navigate('/login')} className="text-[#00B36E] text-sm font-bold hover:underline text-left">Client Portal</button>
+                <div className="flex flex-col gap-5">
+                  <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Firm</h4>
+                  <button onClick={() => navigate('/team')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">People</button>
+                  <button onClick={() => navigate('/contact')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">Contact</button>
                 </div>
-                <div className="flex flex-col gap-4">
-                  <h4 className="text-[#1a3a32] text-xs font-bold uppercase tracking-widest">Legal</h4>
-                  <a href="#" className="text-slate-500 text-sm hover:text-[#00B36E]">Privacy Policy</a>
-                  <a href="#" className="text-slate-500 text-sm hover:text-[#00B36E]">Disclosure</a>
+                <div className="flex flex-col gap-5">
+                  <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Portals</h4>
+                  <button onClick={() => navigate('/login')} className="text-[#0066CC] text-sm font-bold hover:underline text-left">Investor Login</button>
                 </div>
               </div>
             </div>
             
-            <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-100 gap-4">
-              <p className="text-xs text-slate-400 font-medium tracking-wide">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-[#00B36E] rounded-full"></div>
-                <p className="text-[10px] text-[#00B36E] uppercase tracking-widest font-bold">Secure Global Terminal</p>
+            <div className="flex flex-col md:flex-row justify-between items-center pt-10 border-t border-slate-100 gap-6">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">© 2024 Centralake Capital LLC.</p>
+              <div className="flex gap-8">
+                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-widest hover:text-[#0066CC]">Terms</a>
+                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-widest hover:text-[#0066CC]">Privacy</a>
               </div>
             </div>
           </div>

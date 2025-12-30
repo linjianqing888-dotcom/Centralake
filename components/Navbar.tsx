@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { User, ContentData } from '../types.ts';
 
@@ -14,6 +14,16 @@ interface Props {
 const Navbar: React.FC<Props> = ({ user, content, onRefresh, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+
+  // 监听滚动，改变背景色
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     if (location.pathname === '/') {
@@ -23,96 +33,64 @@ const Navbar: React.FC<Props> = ({ user, content, onRefresh, onLogout }) => {
     }
   };
 
-  const NavItem: React.FC<{ to: string, label: string, hasDropdown?: boolean }> = ({ to, label, hasDropdown }) => (
-    <Link 
-      to={to} 
-      className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-800 hover:text-[#00B36E] transition-colors"
-    >
-      {label}
-      {hasDropdown && (
-        <svg className="w-3 h-3 text-slate-400 group-hover:text-[#00B36E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-        </svg>
-      )}
-    </Link>
-  );
+  const isHomePage = location.pathname === '/';
 
   return (
-    <header className="fixed w-full z-50 shadow-sm">
-      {/* Top Bar - Screenshot Style with Green Theme */}
-      <div className="bg-[#064e3b] text-white py-2 px-8 flex justify-center items-center gap-4 text-xs font-medium tracking-tight">
-        <span className="opacity-95">Discover our new strategic approach for mid-market transformation 2024</span>
-        <button className="border border-white/40 px-3 py-1 rounded-md text-[10px] hover:bg-white hover:text-[#064e3b] transition-all font-bold">
-          Learn More
-        </button>
-      </div>
-
-      {/* Main Navbar */}
-      <nav className="bg-white border-b border-slate-100 px-8 py-3.5 flex justify-between items-center">
-        {/* Left: Logo */}
+    <header 
+      className={`fixed w-full z-50 transition-all duration-500 ${
+        scrolled ? 'bg-[#002147] py-3 shadow-lg' : 'bg-transparent py-6'
+      }`}
+    >
+      <nav className="max-w-[1600px] mx-auto px-8 md:px-12 flex justify-between items-center">
+        {/* Left: Logo (Silver Lake style - simple text/logo) */}
         <Link 
           to="/"
           onClick={handleLogoClick}
-          className="flex items-center min-w-[180px]"
+          className="flex items-center"
         >
-          <img 
-            src={content.logoUrl} 
-            alt="Centralake Capital" 
-            className="h-10 w-auto object-contain"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "https://placehold.co/200x50/00b36e/ffffff?text=Centralake";
-            }}
-          />
+          <span className="text-white text-2xl font-bold tracking-tight uppercase font-serif">
+            Centralake
+          </span>
         </Link>
 
-        {/* Center: Navigation Links */}
-        <div className="hidden lg:flex items-center gap-8">
-          <NavItem to="/strategy" label="Strategy" hasDropdown />
-          <NavItem to="/portfolio" label="Portfolio" hasDropdown />
-          <NavItem to="/team" label="Company" hasDropdown />
-          <NavItem to="/contact" label="Resources" />
-        </div>
+        {/* Right: Menu */}
+        <div className="flex items-center gap-10">
+          <div className="hidden lg:flex items-center gap-10">
+            <Link to="/portfolio" className="text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:text-[#00A3FF] transition-colors">Portfolio</Link>
+            <Link to="/team" className="text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:text-[#00A3FF] transition-colors">People</Link>
+            <Link to="/strategy" className="text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:text-[#00A3FF] transition-colors">Purpose</Link>
+          </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-6">
-          {!user ? (
-            <>
+          <div className="flex items-center gap-6 border-l border-white/20 pl-10">
+            {/* Search Icon */}
+            <button className="text-white hover:text-[#00A3FF] transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+            
+            {/* Burger Menu */}
+            <button className="text-white hover:text-[#00A3FF] transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />
+              </svg>
+            </button>
+
+            {!user ? (
               <button 
                 onClick={() => navigate('/login')}
-                className="text-[13px] font-semibold text-slate-800 hover:text-[#00B36E] transition-colors"
+                className="bg-white text-[#002147] px-4 py-1.5 rounded-sm text-[10px] font-bold uppercase tracking-widest hover:bg-[#00A3FF] hover:text-white transition-all"
               >
                 Log In
               </button>
+            ) : (
               <button 
-                onClick={() => navigate('/contact')}
-                className="bg-white border-2 border-[#00B36E] text-[#00B36E] px-5 py-2 rounded-lg text-[13px] font-bold hover:bg-[#00B36E] hover:text-white transition-all shadow-sm"
+                onClick={onLogout}
+                className="text-white/60 text-[10px] font-bold uppercase hover:text-white"
               >
-                Book a Demo
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-4">
-              <span className="text-[11px] font-bold text-[#064e3b] uppercase tracking-wider hidden md:block">
-                Welcome, {user.name.split(' ')[0]}
-              </span>
-              <button 
-                onClick={() => navigate(user.role === 'admin' ? '/admin' : '/portal')}
-                className="bg-[#00B36E] text-white px-5 py-2 rounded-lg text-[13px] font-bold hover:bg-[#008f58] transition-all"
-              >
-                {user.role === 'admin' ? 'Admin Center' : 'Investor Portal'}
-              </button>
-              <button onClick={onLogout} className="text-red-500 text-[13px] font-bold hover:underline ml-2">
                 Logout
               </button>
-            </div>
-          )}
-          
-          {/* Globe Icon Placeholder */}
-          <div className="p-2 bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-colors hidden sm:block">
-            <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-            </svg>
+            )}
           </div>
         </div>
       </nav>
