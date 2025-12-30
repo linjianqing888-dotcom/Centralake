@@ -34,61 +34,62 @@ const LoginForm: React.FC<Props> = ({ onLogin, content }) => {
   };
 
   return (
-    <div className="min-h-screen pt-32 px-6 flex justify-center bg-[#050505]">
+    <div className="min-h-screen pt-48 px-6 flex justify-center bg-[#050505]">
       <div className="max-w-md w-full">
-        <div className="bg-slate-900/30 p-10 rounded-2xl border border-emerald-500/10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+        <div className="bg-[#002147]/20 p-12 rounded-sm border border-white/5 backdrop-blur-xl shadow-2xl relative overflow-hidden">
           {isLoggingIn && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-              <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-emerald-500 text-[9px] uppercase tracking-widest font-bold">Verifying Credentials...</p>
+              <div className="w-8 h-8 border-2 border-[#00A3FF] border-t-transparent rounded-full animate-spin mb-4"></div>
+              <p className="text-[#00A3FF] text-[9px] uppercase tracking-widest font-bold">Verifying...</p>
             </div>
           )}
 
-          <div className="text-center mb-10">
-            <div className="flex justify-center mb-6">
-              <img src={content.logoUrl} alt="Logo" className="h-16 w-auto object-contain" />
+          <div className="text-center mb-12">
+            <div className="flex flex-col items-center mb-8">
+              <span className="text-white text-3xl font-bold uppercase tracking-tighter">Centralake</span>
+              <span className="text-[#00A3FF] text-[10px] font-bold uppercase tracking-[0.5em] mt-2">Capital</span>
             </div>
-            <p className="text-slate-500 text-xs tracking-widest uppercase font-bold">Authorized Terminal Access</p>
+            <p className="text-slate-500 text-[10px] tracking-[0.2em] uppercase font-bold">Authorized Investor Portal</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label className="block text-[10px] uppercase text-[#00B36E] mb-2 tracking-widest font-bold">Email</label>
+              <label className="block text-[10px] uppercase text-[#00A3FF] mb-3 tracking-widest font-bold">Email Address</label>
               <input 
                 type="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full bg-black/50 border border-white/5 p-4 rounded text-white focus:border-[#00B36E] outline-none transition-all placeholder:text-slate-800"
+                className="w-full bg-black/30 border border-white/10 p-4 rounded-sm text-white focus:border-[#0066CC] outline-none transition-all placeholder:text-slate-800"
                 placeholder="partner@centralake.com"
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase text-[#00B36E] mb-2 tracking-widest font-bold">Secure Key</label>
+              <label className="block text-[10px] uppercase text-[#00A3FF] mb-3 tracking-widest font-bold">Secure Access Key</label>
               <input 
                 type="password"
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full bg-black/50 border border-white/5 p-4 rounded text-white focus:border-[#00B36E] outline-none transition-all placeholder:text-slate-800"
+                className="w-full bg-black/30 border border-white/10 p-4 rounded-sm text-white focus:border-[#0066CC] outline-none transition-all placeholder:text-slate-800"
                 placeholder="••••••••"
               />
             </div>
 
-            {error && <p className="text-red-400 text-[10px] bg-red-400/5 p-3 rounded border border-red-400/10 font-bold uppercase tracking-tight">{error}</p>}
+            {error && <p className="text-red-400 text-[10px] bg-red-400/5 p-4 rounded-sm border border-red-400/10 font-bold uppercase tracking-tight">{error}</p>}
 
             <button 
               type="submit"
               disabled={isLoggingIn}
-              className="w-full py-4 bg-[#00B36E] hover:bg-[#008f58] text-white font-bold uppercase tracking-widest transition-all rounded shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+              className="w-full py-5 bg-[#0066CC] hover:bg-[#004e9a] text-white font-bold uppercase tracking-widest text-[11px] transition-all rounded-sm shadow-xl disabled:opacity-50"
             >
-              Sign In
+              Authenticate Session
             </button>
           </form>
 
-          <div className="mt-10 pt-8 border-t border-white/5 text-center">
+          <div className="mt-12 pt-8 border-t border-white/5 text-center">
             <p className="text-[9px] text-slate-700 uppercase tracking-widest font-bold">
-              Secure Session Layer 1.3 Active
+              Secure Socket Layer (SSL) 4096-bit Active
             </p>
           </div>
         </div>

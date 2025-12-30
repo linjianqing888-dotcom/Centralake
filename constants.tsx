@@ -10,7 +10,7 @@ export const COLORS = {
 };
 
 export const INITIAL_CONTENT: ContentData = {
-  logoUrl: "https://placehold.co/400x100/002147/ffffff?text=Centralake+Capital", 
+  logoUrl: "", // 不再使用图片Logo
   faviconUrl: "https://placehold.co/32x32/0066CC/ffffff?text=C", 
   heroTitle: "The global leader in technology investing",
   heroSubtitle: "WE ARE CENTRALAKE",

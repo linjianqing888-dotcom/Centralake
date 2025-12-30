@@ -70,7 +70,7 @@ const App: React.FC = () => {
   const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
-    <div className="min-h-screen text-slate-200 bg-[#050505]">
+    <div className="min-h-screen text-slate-200 bg-[#050505] selection:bg-[#0066CC] selection:text-white">
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
@@ -79,7 +79,6 @@ const App: React.FC = () => {
         onLogout={handleLogout} 
       />
       
-      {/* Remove pt-[84px] because Navbar is now overlaying on Hero */}
       <main className="animate-fadeIn">
         <Routes>
           <Route path="/" element={<Hero content={state.siteContent} />} />
@@ -104,39 +103,42 @@ const App: React.FC = () => {
       </main>
 
       {!isSpecialPage && (
-        <footer className="bg-white py-20 px-12 border-t border-slate-200">
+        <footer className="bg-white py-24 px-12 border-t border-slate-200">
           <div className="max-w-[1600px] mx-auto">
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-20 mb-20">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-24 mb-24">
               <div className="flex flex-col gap-8 max-w-sm">
-                <span className="text-[#002147] text-3xl font-bold uppercase tracking-tighter font-serif">Centralake</span>
-                <p className="text-slate-500 text-sm leading-relaxed">
+                <div className="flex flex-col">
+                  <span className="text-[#002147] text-3xl font-bold uppercase tracking-tighter leading-none">Centralake</span>
+                  <span className="text-[#0066CC] text-[10px] font-bold uppercase tracking-[0.5em] mt-2 leading-none">Capital</span>
+                </div>
+                <p className="text-slate-500 text-sm leading-relaxed font-light mt-4">
                   Leading the global technology investment landscape through innovative capital solutions and deep operational partnership.
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-20">
-                <div className="flex flex-col gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-24">
+                <div className="flex flex-col gap-6">
                   <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Insights</h4>
-                  <button onClick={() => navigate('/strategy')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">Strategy</button>
-                  <button onClick={() => navigate('/portfolio')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">Portfolio</button>
+                  <button onClick={() => navigate('/strategy')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">Strategy</button>
+                  <button onClick={() => navigate('/portfolio')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">Portfolio</button>
                 </div>
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-6">
                   <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Firm</h4>
-                  <button onClick={() => navigate('/team')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">People</button>
-                  <button onClick={() => navigate('/contact')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors">Contact</button>
+                  <button onClick={() => navigate('/team')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">People</button>
+                  <button onClick={() => navigate('/contact')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">Contact</button>
                 </div>
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-6">
                   <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Portals</h4>
                   <button onClick={() => navigate('/login')} className="text-[#0066CC] text-sm font-bold hover:underline text-left">Investor Login</button>
                 </div>
               </div>
             </div>
             
-            <div className="flex flex-col md:flex-row justify-between items-center pt-10 border-t border-slate-100 gap-6">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">© 2024 Centralake Capital LLC.</p>
-              <div className="flex gap-8">
-                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-widest hover:text-[#0066CC]">Terms</a>
-                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-widest hover:text-[#0066CC]">Privacy</a>
+            <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-slate-100 gap-8">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
+              <div className="flex gap-10">
+                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] hover:text-[#0066CC] transition-colors">Terms of Use</a>
+                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] hover:text-[#0066CC] transition-colors">Privacy Policy</a>
               </div>
             </div>
           </div>
