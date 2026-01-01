@@ -46,6 +46,14 @@ const App: React.FC = () => {
     silentRefresh();
   }, [silentRefresh]);
 
+  // Sync Favicon dynamically across all routes
+  useEffect(() => {
+    const favicon = document.getElementById('favicon') as HTMLLinkElement;
+    if (favicon && state.siteContent.faviconUrl) {
+      favicon.href = state.siteContent.faviconUrl;
+    }
+  }, [state.siteContent.faviconUrl]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
