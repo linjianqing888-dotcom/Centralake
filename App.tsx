@@ -9,9 +9,15 @@ import Hero from './components/Hero.tsx';
 import AdminDashboard from './components/AdminDashboard.tsx';
 import ClientPortal from './components/ClientPortal.tsx';
 import LoginForm from './components/LoginForm.tsx';
-import Portfolio from './components/Portfolio.tsx';
-import Team from './components/Team.tsx';
 import Contact from './components/Contact.tsx';
+
+// New Specialized Pages
+import InvestmentManagement from './components/InvestmentManagement.tsx';
+import TechnologyConsulting from './components/TechnologyConsulting.tsx';
+import RealAssets from './components/RealAssets.tsx';
+import StarterGrowth from './components/StarterGrowth.tsx';
+import ImpactBlog from './components/ImpactBlog.tsx';
+import NewsRoom from './components/NewsRoom.tsx';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>({
@@ -81,13 +87,14 @@ const App: React.FC = () => {
       <main className="animate-fadeIn">
         <Routes>
           <Route path="/" element={<Hero content={state.siteContent} />} />
-          <Route path="/investment-management" element={<Portfolio content={state.siteContent} />} />
-          <Route path="/technology" element={<Portfolio content={state.siteContent} />} />
-          <Route path="/real-assets" element={<Portfolio content={state.siteContent} />} />
-          <Route path="/starter-growth" element={<Team content={state.siteContent} />} />
-          <Route path="/impact" element={<Team content={state.siteContent} />} />
-          <Route path="/news" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
+          <Route path="/investment-management" element={<InvestmentManagement />} />
+          <Route path="/technology" element={<TechnologyConsulting />} />
+          <Route path="/real-assets" element={<RealAssets />} />
+          <Route path="/starter-growth" element={<StarterGrowth />} />
+          <Route path="/impact" element={<ImpactBlog />} />
+          <Route path="/news" element={<NewsRoom />} />
           <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state.siteContent} />} />
+          <Route path="/contact" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
           
           <Route 
             path="/admin" 
@@ -110,7 +117,7 @@ const App: React.FC = () => {
               <span className="text-[#001226] text-4xl font-serif-elegant font-light tracking-[0.1em] uppercase">Centralake</span>
               <div className="flex flex-wrap justify-center gap-12">
                 <button onClick={() => navigate('/login')} className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#0066CC] hover:opacity-70 transition-opacity">Investor Login</button>
-                <button onClick={() => navigate('/news')} className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-900 transition-colors">Inquiries</button>
+                <button onClick={() => navigate('/contact')} className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-900 transition-colors">Inquiries</button>
                 <a href="#" className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-900 transition-colors">Privacy Policy</a>
                 <a href="#" className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-900 transition-colors">Legal Notices</a>
               </div>
