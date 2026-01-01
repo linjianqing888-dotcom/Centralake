@@ -45,23 +45,45 @@ const App: React.FC = () => {
     silentRefresh();
   }, [silentRefresh]);
 
-  // Sync Favicon dynamically with aggressive fallback to prevent browser reverting to defaults
+  /**
+   * FAVICON GUARDIAN
+   * Prevents the browser from reverting to a cached "green" icon.
+   */
   useEffect(() => {
-    const faviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
+    const rawFaviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
+    // Add cache-busting timestamp to force the browser to re-fetch the blue icon
+    const faviconUrl = `${rawFaviconUrl}${rawFaviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
     
-    // Target specific IDs from index.html
-    const iconIds = ['favicon-icon', 'favicon-shortcut', 'favicon-apple'];
-    iconIds.forEach(id => {
-      const el = document.getElementById(id) as HTMLLinkElement;
-      if (el) el.href = faviconUrl;
-    });
+    const updateIcons = () => {
+      // 1. Remove ANY other existing icon tags that don't have our IDs
+      // This kills the "green" icon if it's being injected by the platform
+      const allIcons = document.querySelectorAll('link[rel*="icon"]');
+      allIcons.forEach(tag => {
+        if (!tag.id || !tag.id.startsWith('favicon-')) {
+          tag.remove();
+        }
+      });
 
-    // Also scan for any dynamically injected or standard link tags
-    const allIconTags = document.querySelectorAll('link[rel*="icon"]');
-    allIconTags.forEach(tag => {
-      (tag as HTMLLinkElement).href = faviconUrl;
-    });
-  }, [state.siteContent.faviconUrl, location.pathname]); // Update on route change as well for robustness
+      // 2. Update our specific designated tags
+      const iconIds = ['favicon-icon', 'favicon-shortcut', 'favicon-apple'];
+      iconIds.forEach(id => {
+        let el = document.getElementById(id) as HTMLLinkElement;
+        if (!el) {
+          el = document.createElement('link');
+          el.id = id;
+          el.rel = id === 'favicon-apple' ? 'apple-touch-icon' : (id === 'favicon-shortcut' ? 'shortcut icon' : 'icon');
+          document.head.appendChild(el);
+        }
+        el.href = faviconUrl;
+      });
+    };
+
+    updateIcons();
+    
+    // Sometimes browsers refresh the icon after a few seconds, let's double check
+    const timer = setTimeout(updateIcons, 2000);
+    return () => clearTimeout(timer);
+  }, [state.siteContent.faviconUrl, location.pathname]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

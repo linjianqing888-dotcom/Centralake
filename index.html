@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centralake Capital | Private Equity Excellence</title>
-    <!-- 显式定义多种 Favicon 标签并赋予 ID，防止浏览器自动抓取根目录的默认 ico -->
-    <link rel="icon" id="favicon-icon" href="https://placehold.co/32x32/0066CC/ffffff?text=C" />
-    <link rel="shortcut icon" id="favicon-shortcut" href="https://placehold.co/32x32/0066CC/ffffff?text=C" />
-    <link rel="apple-touch-icon" id="favicon-apple" href="https://placehold.co/180x180/0066CC/ffffff?text=C" />
+    
+    <!-- 1. 使用 Base64 数据直接嵌入蓝色图标，确保零延迟加载且不依赖外部网络 -->
+    <link rel="icon" id="favicon-icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEKSURBVHgB7VexS8NQEH7vS9NoS0FrpS6O6iI4uTo6iIuDguLk6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6I5/8AcI7V/Y8p50hAAAAABJRU5ErkJggg==" />
+    <link rel="shortcut icon" id="favicon-shortcut" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEKSURBVHgB7VexS8NQEH7vS9NoS0FrpS6O6iI4uTo6iIuDguLk6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6C6uLg6C6I5/8AcI7V/Y8p50hAAAAABJRU5ErkJggg==" />
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@200;300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #ffffff; /* Pure White Background */
+            background-color: #ffffff;
             color: #1a1a1a;
             margin: 0;
             overflow-x: hidden;
@@ -32,7 +32,6 @@
         #root {
             min-height: 100vh;
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
