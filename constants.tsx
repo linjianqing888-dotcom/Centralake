@@ -10,7 +10,8 @@ export const COLORS = {
 
 export const INITIAL_CONTENT: ContentData = {
   logoUrl: "", 
-  faviconUrl: "https://placehold.co/32x32/64748b/ffffff?text=CL", // 初始使用中性灰色，而非强制蓝色
+  // 使用 1x1 透明像素作为绝对保底，确保不会出现 "CL" 或系统默认图标
+  faviconUrl: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
   heroTitle: "The global leader in technology investing",
   heroSubtitle: "CENTRALAKE | Integrating Value",
   heroImageUrl: "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&q=80&w=2000",
