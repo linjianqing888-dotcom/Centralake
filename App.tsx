@@ -84,7 +84,7 @@ const App: React.FC = () => {
           <Route path="/investment-management" element={<Portfolio content={state.siteContent} />} />
           <Route path="/technology" element={<Portfolio content={state.siteContent} />} />
           <Route path="/real-assets" element={<Portfolio content={state.siteContent} />} />
-          <Route path="/venture-growth" element={<Team content={state.siteContent} />} />
+          <Route path="/starter-growth" element={<Team content={state.siteContent} />} />
           <Route path="/impact" element={<Team content={state.siteContent} />} />
           <Route path="/news" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
           <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state.siteContent} />} />
@@ -109,12 +109,13 @@ const App: React.FC = () => {
             <div className="flex flex-col items-center gap-12 mb-16">
               <span className="text-slate-800 text-3xl font-serif-elegant font-light tracking-[0.2em] uppercase">Centralake</span>
               <div className="flex flex-wrap justify-center gap-10">
-                <button onClick={() => navigate('/login')} className="text-xs font-bold uppercase tracking-widest text-[#0066CC] hover:opacity-70 transition-opacity">Investor Login</button>
-                <button onClick={() => navigate('/news')} className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Contact</button>
-                <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Privacy</a>
+                <button onClick={() => navigate('/login')} className="text-[10px] font-bold uppercase tracking-widest text-[#0066CC] hover:opacity-70 transition-opacity">Investor Login</button>
+                <button onClick={() => navigate('/news')} className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Contact</button>
+                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Privacy Policy</a>
+                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Terms of Use</a>
               </div>
             </div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
+            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.3em]">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
           </div>
         </footer>
       )}

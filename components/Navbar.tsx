@@ -42,23 +42,25 @@ const Navbar: React.FC<Props> = ({ user, onLogout }) => {
         </Link>
 
         {/* Bottom: Centered Navigation Row */}
-        <nav className="flex items-center gap-8 md:gap-12 flex-wrap justify-center px-4">
+        <nav className="flex items-center gap-8 md:gap-10 flex-wrap justify-center px-4">
           <NavItem to="/investment-management" label="Investment Management" />
           <NavItem to="/technology" label="Technology" />
           <NavItem to="/real-assets" label="Real Assets" />
-          <NavItem to="/venture-growth" label="Venture & Growth" />
+          <NavItem to="/starter-growth" label="Starter & Growth" />
           <NavItem to="/impact" label="Impact" />
           <NavItem to="/news" label="News" />
           
-          {user ? (
-            <button onClick={onLogout} className="text-[11px] font-bold uppercase tracking-widest text-red-500 hover:opacity-70 ml-4">
-              Logout
-            </button>
-          ) : (
-            <Link to="/login" className="text-[11px] font-bold uppercase tracking-widest text-[#0066CC] hover:opacity-70 ml-4">
-              Portal
-            </Link>
-          )}
+          <div className="flex items-center gap-6 ml-6 border-l border-slate-100 pl-6">
+            {user ? (
+              <button onClick={onLogout} className="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:opacity-70">
+                Logout
+              </button>
+            ) : (
+              <Link to="/login" className="text-[10px] font-bold uppercase tracking-widest text-[#0066CC] hover:opacity-70">
+                Portal
+              </Link>
+            )}
+          </div>
         </nav>
       </div>
     </header>
