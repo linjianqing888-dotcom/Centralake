@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
@@ -46,61 +47,60 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * EXTREME FAVICON GUARDIAN
-   * This logic aggressively fights off environment-default "green" icons.
+   * SUPERIOR FAVICON GUARDIAN
+   * Fights off platform defaults and ensures CMS-managed icons take precedence.
    */
   useEffect(() => {
+    // Priority: Cloud Content > Initial Constant > Base64 Fallback
     const rawFaviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
-    // 使用时间戳彻底击穿任何潜在的缓存
-    const faviconUrl = `${rawFaviconUrl}${rawFaviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
     
-    const enforceBlueFavicon = () => {
-      // 1. 彻底移除所有非我们主动创建的图标标签（防止环境注入）
-      const suspiciousIcons = document.querySelectorAll('link[rel*="icon"]');
-      suspiciousIcons.forEach(tag => {
-        if (tag.id !== 'favicon-primary' && tag.id !== 'favicon-backup') {
+    // Add a unique version to the URL to force browser to dump any "green" cache
+    const v = rawFaviconUrl.startsWith('data:') ? '' : (rawFaviconUrl.includes('?') ? '&v=' : '?v=') + Date.now();
+    const finalUrl = rawFaviconUrl + v;
+
+    const lockIcon = () => {
+      // 1. Clear out ANY Link tags that try to set an icon (platform injections)
+      const existingIcons = document.querySelectorAll('link[rel*="icon"]');
+      existingIcons.forEach(tag => {
+        if (tag.id !== 'centralake-favicon-main' && tag.id !== 'centralake-favicon-alt') {
           tag.remove();
         }
       });
 
-      // 2. 强制同步我们的主图标
-      let primary = document.getElementById('favicon-primary') as HTMLLinkElement;
-      if (!primary) {
-        primary = document.createElement('link');
-        primary.id = 'favicon-primary';
-        primary.rel = 'icon';
-        document.head.appendChild(primary);
+      // 2. Set/Update our Primary Link tag
+      let main = document.getElementById('centralake-favicon-main') as HTMLLinkElement;
+      if (!main) {
+        main = document.createElement('link');
+        main.id = 'centralake-favicon-main';
+        main.rel = 'icon';
+        main.type = 'image/png';
+        document.head.appendChild(main);
       }
-      if (primary.href !== faviconUrl) {
-        primary.href = faviconUrl;
-      }
+      main.href = finalUrl;
 
-      // 3. 额外添加一个 shortcut icon 标签增加兼容性
-      let backup = document.getElementById('favicon-backup') as HTMLLinkElement;
-      if (!backup) {
-        backup = document.createElement('link');
-        backup.id = 'favicon-backup';
-        backup.rel = 'shortcut icon';
-        document.head.appendChild(backup);
+      // 3. Set/Update Alternative Link tag (for older browser compatibility)
+      let alt = document.getElementById('centralake-favicon-alt') as HTMLLinkElement;
+      if (!alt) {
+        alt = document.createElement('link');
+        alt.id = 'centralake-favicon-alt';
+        alt.rel = 'shortcut icon';
+        document.head.appendChild(alt);
       }
-      if (backup.href !== faviconUrl) {
-        backup.href = faviconUrl;
-      }
+      alt.href = finalUrl;
     };
 
-    // 执行初始锁定
-    enforceBlueFavicon();
+    // Run immediately
+    lockIcon();
 
-    // 关键：在最初的 5 秒内，每 500ms 强制锁定一次。
-    // 很多平台会在页面加载后动态注入自己的脚本或 manifest，这能确保我们赢下这场“控制权博弈”。
-    const interval = setInterval(enforceBlueFavicon, 500);
-    const timeout = setTimeout(() => clearInterval(interval), 5000);
+    // Re-run periodically during the first few seconds to combat late-injecting scripts
+    const interval = setInterval(lockIcon, 1000);
+    const timeout = setTimeout(() => clearInterval(interval), 10000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [state.siteContent.faviconUrl, location.pathname]);
+  }, [state.siteContent.faviconUrl]); // Re-run when CMS changes the URL
 
   useEffect(() => {
     window.scrollTo(0, 0);

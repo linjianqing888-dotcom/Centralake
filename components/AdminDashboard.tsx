@@ -16,7 +16,7 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [cloudConnected, setCloudConnected] = useState(false);
   
-  const logoInputRef = useRef<HTMLInputElement>(null);
+  const faviconInputRef = useRef<HTMLInputElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
     try {
       await ApiService.updateSiteContent(content);
       onUpdate(content);
-      alert('Global Cloud Sync Complete.');
+      alert('Global Cloud Sync Complete. Favicon and content updated.');
     } catch (e) {
       alert('Local save successful, but cloud sync failed.');
     } finally {
@@ -50,7 +50,7 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'heroImageUrl') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'faviconUrl' | 'heroImageUrl') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -137,6 +137,38 @@ const AdminDashboard: React.FC<Props> = ({ state, onUpdate }) => {
 
           {activeTab === 'media' && (
             <div className="space-y-12">
+               {/* Favicon Upload Section */}
+               <div className="bg-slate-900/40 border border-white/5 p-10 rounded-sm">
+                <h2 className="text-[#00A3FF] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Brand Identity (Favicon)</h2>
+                <div className="flex items-center gap-10 mb-8">
+                  <div className="w-16 h-16 bg-black/40 rounded-sm border border-white/10 flex items-center justify-center overflow-hidden relative">
+                    <img src={content.faviconUrl} alt="Favicon Preview" className="w-8 h-8 object-contain" />
+                    {uploadingField === 'faviconUrl' && (
+                      <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-[#00A3FF] border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm mb-4">Upload a high-resolution PNG or ICO file for the browser tab icon.</p>
+                    <input 
+                      type="file" 
+                      ref={faviconInputRef}
+                      accept=".png,.ico,.jpg,.svg"
+                      className="hidden" 
+                      onChange={(e) => handleFileUpload(e, 'faviconUrl')}
+                    />
+                    <button 
+                      onClick={() => faviconInputRef.current?.click()}
+                      className="bg-[#0066CC]/10 hover:bg-[#0066CC]/20 text-[#00A3FF] px-6 py-3 border border-[#0066CC]/20 text-[10px] font-bold uppercase tracking-widest transition-all"
+                    >
+                      Update Icon
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+               {/* Hero Background Section */}
                <div className="bg-slate-900/40 border border-white/5 p-10 rounded-sm">
                 <h2 className="text-[#00A3FF] text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Hero Background</h2>
                 <div className="w-full aspect-[21/9] bg-black/40 rounded-sm border border-white/10 overflow-hidden relative mb-8">
