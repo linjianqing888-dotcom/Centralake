@@ -19,22 +19,19 @@ import ImpactBlog from './components/ImpactBlog.tsx';
 import NewsRoom from './components/NewsRoom.tsx';
 
 const App: React.FC = () => {
-  // 关键修复：使用延迟初始化函数，确保 React 启动时的第一帧状态就包含用户上传的 Favicon
+  // 初始化状态时直接同步本地缓存，确保第一帧渲染不会回退到默认图标
   const [state, setState] = useState<AppState>(() => {
     const STORAGE_KEY = 'centralake_cloud_mock';
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // 如果缓存中有数据，直接作为初始状态，避免使用 INITIAL_CONTENT 导致的闪烁
         return {
           ...parsed,
-          currentUser: null // 登录状态不持久化
+          currentUser: null 
         };
       }
-    } catch (e) {
-      console.warn("Failed to load initial state from storage");
-    }
+    } catch (e) {}
     return {
       currentUser: null,
       siteContent: INITIAL_CONTENT,
@@ -63,8 +60,8 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * 同步 CMS 选定的图标
-   * 由于初始状态已经同步，这里只会处理后续的动态修改
+   * 稳定的 Favicon 同步逻辑
+   * 移除 Date.now()，只有当 URL 真正改变时才操作 DOM
    */
   useEffect(() => {
     const faviconUrl = state.siteContent.faviconUrl;
@@ -73,11 +70,11 @@ const App: React.FC = () => {
     const syncTag = (id: string) => {
       const link = document.getElementById(id) as HTMLLinkElement;
       if (link) {
-        // 只有当 URL 确实不同时才修改，防止重复触发导致的微弱闪烁
-        const currentHref = link.getAttribute('href');
-        if (currentHref !== faviconUrl && !currentHref?.startsWith(faviconUrl)) {
-           const versioned = faviconUrl.includes('data:') ? faviconUrl : `${faviconUrl}${faviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
-           link.href = versioned;
+        const currentUrl = link.getAttribute('data-managed-url');
+        // 只有当 URL 确实不同时才更新，防止重复触发导致的闪烁
+        if (currentUrl !== faviconUrl) {
+          link.href = faviconUrl;
+          link.setAttribute('data-managed-url', faviconUrl);
         }
       }
     };
