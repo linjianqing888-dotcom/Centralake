@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
 import { ApiService } from './services/api.ts';
@@ -10,7 +10,7 @@ import ClientPortal from './components/ClientPortal.tsx';
 import LoginForm from './components/LoginForm.tsx';
 import Contact from './components/Contact.tsx';
 
-// New Specialized Pages
+// Specialized Pages
 import InvestmentManagement from './components/InvestmentManagement.tsx';
 import TechnologyConsulting from './components/TechnologyConsulting.tsx';
 import RealAssets from './components/RealAssets.tsx';
@@ -28,7 +28,6 @@ const App: React.FC = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const observerRef = useRef<MutationObserver | null>(null);
 
   const silentRefresh = useCallback(async () => {
     try {
@@ -47,89 +46,34 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * ATOMIC FAVICON OBSERVER
-   * Uses MutationObserver to detect and instantly kill any third-party icon injections.
+   * SIMPLIFIED FAVICON UPDATE
+   * Directly sets the uploaded image as the site icon without aggressive locking/monitoring.
    */
   useEffect(() => {
-    const targetUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
-    if (!targetUrl) return;
+    const faviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
+    if (!faviconUrl) return;
 
-    // Use a high-entropy version key to bypass browser and platform caches
-    const versionedUrl = targetUrl.startsWith('data:') 
-      ? targetUrl 
-      : `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}v-lock=${Date.now()}`;
-
-    const enforceIcon = () => {
-      const head = document.head;
-      let needsUpdate = false;
-
-      // 1. Find all potential icon links
-      const allLinks = head.querySelectorAll('link[rel*="icon"]');
-      
-      allLinks.forEach(link => {
-        const l = link as HTMLLinkElement;
-        // If it's not one of our locked IDs, it's an intruder (like the green Vercel icon)
-        if (l.id !== 'centralake-lock-primary' && l.id !== 'centralake-lock-alt') {
-          l.remove();
-          needsUpdate = true;
-        } else if (l.href !== versionedUrl) {
-          l.href = versionedUrl;
-        }
-      });
-
-      // 2. Ensure our tags exist
-      let primary = document.getElementById('centralake-lock-primary') as HTMLLinkElement;
-      if (!primary) {
-        primary = document.createElement('link');
-        primary.id = 'centralake-lock-primary';
-        primary.rel = 'icon';
-        primary.type = 'image/png';
-        primary.href = versionedUrl;
-        head.appendChild(primary);
-      }
-
-      let alt = document.getElementById('centralake-lock-alt') as HTMLLinkElement;
-      if (!alt) {
-        alt = document.createElement('link');
-        alt.id = 'centralake-lock-alt';
-        alt.rel = 'shortcut icon';
-        alt.href = versionedUrl;
-        head.appendChild(alt);
-      }
-    };
-
-    // Initial enforcement
-    enforceIcon();
-
-    // Set up MutationObserver to watch for head changes (platform injections)
-    if (observerRef.current) observerRef.current.disconnect();
+    // Find existing link tags or create a new one
+    let link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
     
-    observerRef.current = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          // Check if any link tags were added
-          const addedNodes = Array.from(mutation.addedNodes);
-          const hasIconChange = addedNodes.some(node => 
-            node.nodeName === 'LINK' && (node as HTMLLinkElement).rel.includes('icon')
-          );
-          if (hasIconChange) {
-            enforceIcon();
-          }
-        }
-      }
-    });
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
 
-    observerRef.current.observe(document.head, { childList: true, subtree: true });
+    // Update the href to the uploaded image
+    link.href = faviconUrl;
+    
+    // Also update the shortcut icon for broader compatibility
+    let shortcutLink: HTMLLinkElement | null = document.querySelector("link[rel='shortcut icon']");
+    if (!shortcutLink) {
+      shortcutLink = document.createElement('link');
+      shortcutLink.rel = 'shortcut icon';
+      document.head.appendChild(shortcutLink);
+    }
+    shortcutLink.href = faviconUrl;
 
-    // Fallback: Check every 500ms for the first 5 seconds just in case the observer misses a direct attribute update
-    const interval = setInterval(enforceIcon, 500);
-    const timeout = setTimeout(() => clearInterval(interval), 5000);
-
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
   }, [state.siteContent.faviconUrl]);
 
   useEffect(() => {
