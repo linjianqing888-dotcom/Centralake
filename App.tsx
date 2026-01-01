@@ -9,7 +9,6 @@ import Hero from './components/Hero.tsx';
 import AdminDashboard from './components/AdminDashboard.tsx';
 import ClientPortal from './components/ClientPortal.tsx';
 import LoginForm from './components/LoginForm.tsx';
-import Strategy from './components/Strategy.tsx';
 import Portfolio from './components/Portfolio.tsx';
 import Team from './components/Team.tsx';
 import Contact from './components/Contact.tsx';
@@ -70,7 +69,7 @@ const App: React.FC = () => {
   const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
-    <div className="min-h-screen text-slate-200 bg-[#050505] selection:bg-[#0066CC] selection:text-white">
+    <div className="min-h-screen text-slate-800 bg-white selection:bg-[#0066CC] selection:text-white">
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
@@ -82,10 +81,12 @@ const App: React.FC = () => {
       <main className="animate-fadeIn">
         <Routes>
           <Route path="/" element={<Hero content={state.siteContent} />} />
-          <Route path="/strategy" element={<Strategy content={state.siteContent} />} />
-          <Route path="/portfolio" element={<Portfolio content={state.siteContent} />} />
-          <Route path="/team" element={<Team content={state.siteContent} />} />
-          <Route path="/contact" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
+          <Route path="/investment-management" element={<Portfolio content={state.siteContent} />} />
+          <Route path="/technology" element={<Portfolio content={state.siteContent} />} />
+          <Route path="/real-assets" element={<Portfolio content={state.siteContent} />} />
+          <Route path="/venture-growth" element={<Team content={state.siteContent} />} />
+          <Route path="/impact" element={<Team content={state.siteContent} />} />
+          <Route path="/news" element={<Contact onSubmit={handleContactSubmit} onNavigate={(p) => navigate(p === 'home' ? '/' : `/${p}`)} />} />
           <Route path="/login" element={<LoginForm onLogin={handleLogin} content={state.siteContent} />} />
           
           <Route 
@@ -103,44 +104,17 @@ const App: React.FC = () => {
       </main>
 
       {!isSpecialPage && (
-        <footer className="bg-white py-24 px-12 border-t border-slate-200">
-          <div className="max-w-[1600px] mx-auto">
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-24 mb-24">
-              <div className="flex flex-col gap-8 max-w-sm">
-                <div className="flex flex-col">
-                  <span className="text-[#002147] text-3xl font-bold uppercase tracking-tighter leading-none">Centralake</span>
-                  <span className="text-[#0066CC] text-[10px] font-bold uppercase tracking-[0.5em] mt-2 leading-none">Capital</span>
-                </div>
-                <p className="text-slate-500 text-sm leading-relaxed font-light mt-4">
-                  Leading the global technology investment landscape through innovative capital solutions and deep operational partnership.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-24">
-                <div className="flex flex-col gap-6">
-                  <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Insights</h4>
-                  <button onClick={() => navigate('/strategy')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">Strategy</button>
-                  <button onClick={() => navigate('/portfolio')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">Portfolio</button>
-                </div>
-                <div className="flex flex-col gap-6">
-                  <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Firm</h4>
-                  <button onClick={() => navigate('/team')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">People</button>
-                  <button onClick={() => navigate('/contact')} className="text-slate-400 text-sm hover:text-[#0066CC] text-left transition-colors font-light">Contact</button>
-                </div>
-                <div className="flex flex-col gap-6">
-                  <h4 className="text-[#002147] text-[10px] font-bold uppercase tracking-[0.3em]">Portals</h4>
-                  <button onClick={() => navigate('/login')} className="text-[#0066CC] text-sm font-bold hover:underline text-left">Investor Login</button>
-                </div>
+        <footer className="bg-slate-50 py-24 px-12 border-t border-slate-100">
+          <div className="max-w-[1600px] mx-auto text-center">
+            <div className="flex flex-col items-center gap-12 mb-16">
+              <span className="text-slate-800 text-3xl font-serif-elegant font-light tracking-[0.2em] uppercase">Centralake</span>
+              <div className="flex flex-wrap justify-center gap-10">
+                <button onClick={() => navigate('/login')} className="text-xs font-bold uppercase tracking-widest text-[#0066CC] hover:opacity-70 transition-opacity">Investor Login</button>
+                <button onClick={() => navigate('/news')} className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Contact</button>
+                <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Privacy</a>
               </div>
             </div>
-            
-            <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-slate-100 gap-8">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
-              <div className="flex gap-10">
-                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] hover:text-[#0066CC] transition-colors">Terms of Use</a>
-                <a href="#" className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] hover:text-[#0066CC] transition-colors">Privacy Policy</a>
-              </div>
-            </div>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
           </div>
         </footer>
       )}
