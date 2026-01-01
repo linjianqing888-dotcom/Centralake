@@ -5,32 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CENTRALAKE | Integrating Value</title>
     
-    <!-- Flicker Prevention Script: Sets the favicon immediately from local cache if it exists -->
+    <!-- Favicon Guard: 极致防闪烁脚本 -->
     <script>
       (function() {
+        const STORAGE_KEY = 'centralake_cloud_mock';
+        let customUrl = null;
+        
+        // 1. 尝试从本地缓存获取用户上传的图标
         try {
-          const STORAGE_KEY = 'centralake_cloud_mock';
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
             const state = JSON.parse(saved);
-            const url = state.siteContent && state.siteContent.faviconUrl;
-            if (url) {
-              const link = document.createElement('link');
-              link.id = 'dynamic-favicon';
-              link.rel = 'icon';
-              link.href = url;
-              document.head.appendChild(link);
-              
-              const appleLink = document.createElement('link');
-              appleLink.id = 'dynamic-favicon-apple';
-              appleLink.rel = 'apple-touch-icon';
-              appleLink.href = url;
-              document.head.appendChild(appleLink);
-            }
+            customUrl = state.siteContent && state.siteContent.faviconUrl;
           }
-        } catch (e) {
-          console.warn('Favicon pre-load failed', e);
+        } catch (e) {}
+
+        // 默认透明占位符，防止浏览器去请求默认的 /favicon.ico
+        const fallback = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        const finalUrl = customUrl || fallback;
+
+        function applyFavicon(url) {
+          // 清除所有已存在的 icon 标签
+          document.querySelectorAll('link[rel*="icon"]').forEach(el => el.remove());
+          
+          const link = document.createElement('link');
+          link.id = 'centralake-favicon-locked';
+          link.rel = 'icon';
+          link.href = url;
+          document.head.appendChild(link);
+          
+          const apple = document.createElement('link');
+          apple.id = 'centralake-apple-locked';
+          apple.rel = 'apple-touch-icon';
+          apple.href = url;
+          document.head.appendChild(apple);
         }
+
+        // 立即应用
+        applyFavicon(finalUrl);
+
+        // 2. 启动强力观察者，拦截并删除任何非授权的图标注入（防止 Vercel 等平台强制覆盖）
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.tagName === 'LINK' && (node.rel.includes('icon') || node.rel.includes('shortcut'))) {
+                if (node.id !== 'centralake-favicon-locked' && node.id !== 'centralake-apple-locked') {
+                  node.remove(); // 发现非法图标注入，直接抹除
+                }
+              }
+            });
+          });
+        });
+
+        observer.observe(document.head, { childList: true });
+
+        // 5秒后停止观察（通常此时页面已稳定）
+        setTimeout(() => observer.disconnect(), 5000);
       })();
     </script>
     

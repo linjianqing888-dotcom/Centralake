@@ -46,29 +46,23 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * CLEAN FAVICON MANAGEMENT
-   * Updates the icon whenever siteContent changes.
-   * Targets the same element ID established in the index.html boot script.
+   * 同步 CMS 选定的图标到已有的“锁定”标签中
    */
   useEffect(() => {
     const faviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
     if (!faviconUrl) return;
 
-    const updateTag = (id: string, rel: string) => {
-      let link = document.getElementById(id) as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement('link');
-        link.id = id;
-        link.rel = rel;
-        document.head.appendChild(link);
+    const syncTag = (id: string) => {
+      const link = document.getElementById(id) as HTMLLinkElement;
+      if (link && link.href !== faviconUrl) {
+        // 使用时间戳确保刷新后能立即看到新图标
+        const versioned = faviconUrl.includes('data:') ? faviconUrl : `${faviconUrl}${faviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+        link.href = versioned;
       }
-      // Add a small timestamp to the URL to bust browser cache when the file is updated
-      const versionedUrl = faviconUrl.includes('data:') ? faviconUrl : `${faviconUrl}${faviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
-      link.href = versionedUrl;
     };
 
-    updateTag('dynamic-favicon', 'icon');
-    updateTag('dynamic-favicon-apple', 'apple-touch-icon');
+    syncTag('centralake-favicon-locked');
+    syncTag('centralake-apple-locked');
     
   }, [state.siteContent.faviconUrl]);
 
