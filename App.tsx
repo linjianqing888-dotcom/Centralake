@@ -69,7 +69,7 @@ const App: React.FC = () => {
   const isSpecialPage = location.pathname === '/admin' || location.pathname === '/portal';
 
   return (
-    <div className="min-h-screen text-slate-800 bg-white selection:bg-[#0066CC] selection:text-white">
+    <div className="min-h-screen text-slate-200 bg-[#001226] selection:bg-[#0066CC] selection:text-white">
       <Navbar 
         user={state.currentUser} 
         content={state.siteContent}
@@ -104,18 +104,18 @@ const App: React.FC = () => {
       </main>
 
       {!isSpecialPage && (
-        <footer className="bg-slate-50 py-24 px-12 border-t border-slate-100">
-          <div className="max-w-[1600px] mx-auto text-center">
-            <div className="flex flex-col items-center gap-12 mb-16">
-              <span className="text-slate-800 text-3xl font-serif-elegant font-light tracking-[0.2em] uppercase">Centralake</span>
-              <div className="flex flex-wrap justify-center gap-10">
-                <button onClick={() => navigate('/login')} className="text-[10px] font-bold uppercase tracking-widest text-[#0066CC] hover:opacity-70 transition-opacity">Investor Login</button>
-                <button onClick={() => navigate('/news')} className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Contact</button>
-                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Privacy Policy</a>
-                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors">Terms of Use</a>
+        <footer className="bg-[#000a1a] py-32 px-12 border-t border-white/5">
+          <div className="max-w-[1400px] mx-auto text-center">
+            <div className="flex flex-col items-center gap-12 mb-20">
+              <span className="text-white text-4xl font-serif-elegant font-light tracking-[0.2em] uppercase">Centralake</span>
+              <div className="flex flex-wrap justify-center gap-12">
+                <button onClick={() => navigate('/login')} className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#00A3FF] hover:text-white transition-colors">Partner Access</button>
+                <button onClick={() => navigate('/news')} className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 hover:text-white transition-colors">Inquiries</button>
+                <a href="#" className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
+                <a href="#" className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 hover:text-white transition-colors">Cookie Notice</a>
               </div>
             </div>
-            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.3em]">© 2024 Centralake Capital LLC. All Rights Reserved.</p>
+            <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.4em]">© 2024 Centralake Capital LLC. High-Performance Capital Strategy.</p>
           </div>
         </footer>
       )}
