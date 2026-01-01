@@ -46,43 +46,60 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * FAVICON GUARDIAN
-   * Prevents the browser from reverting to a cached "green" icon.
+   * EXTREME FAVICON GUARDIAN
+   * This logic aggressively fights off environment-default "green" icons.
    */
   useEffect(() => {
     const rawFaviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
-    // Add cache-busting timestamp to force the browser to re-fetch the blue icon
+    // 使用时间戳彻底击穿任何潜在的缓存
     const faviconUrl = `${rawFaviconUrl}${rawFaviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
     
-    const updateIcons = () => {
-      // 1. Remove ANY other existing icon tags that don't have our IDs
-      // This kills the "green" icon if it's being injected by the platform
-      const allIcons = document.querySelectorAll('link[rel*="icon"]');
-      allIcons.forEach(tag => {
-        if (!tag.id || !tag.id.startsWith('favicon-')) {
+    const enforceBlueFavicon = () => {
+      // 1. 彻底移除所有非我们主动创建的图标标签（防止环境注入）
+      const suspiciousIcons = document.querySelectorAll('link[rel*="icon"]');
+      suspiciousIcons.forEach(tag => {
+        if (tag.id !== 'favicon-primary' && tag.id !== 'favicon-backup') {
           tag.remove();
         }
       });
 
-      // 2. Update our specific designated tags
-      const iconIds = ['favicon-icon', 'favicon-shortcut', 'favicon-apple'];
-      iconIds.forEach(id => {
-        let el = document.getElementById(id) as HTMLLinkElement;
-        if (!el) {
-          el = document.createElement('link');
-          el.id = id;
-          el.rel = id === 'favicon-apple' ? 'apple-touch-icon' : (id === 'favicon-shortcut' ? 'shortcut icon' : 'icon');
-          document.head.appendChild(el);
-        }
-        el.href = faviconUrl;
-      });
+      // 2. 强制同步我们的主图标
+      let primary = document.getElementById('favicon-primary') as HTMLLinkElement;
+      if (!primary) {
+        primary = document.createElement('link');
+        primary.id = 'favicon-primary';
+        primary.rel = 'icon';
+        document.head.appendChild(primary);
+      }
+      if (primary.href !== faviconUrl) {
+        primary.href = faviconUrl;
+      }
+
+      // 3. 额外添加一个 shortcut icon 标签增加兼容性
+      let backup = document.getElementById('favicon-backup') as HTMLLinkElement;
+      if (!backup) {
+        backup = document.createElement('link');
+        backup.id = 'favicon-backup';
+        backup.rel = 'shortcut icon';
+        document.head.appendChild(backup);
+      }
+      if (backup.href !== faviconUrl) {
+        backup.href = faviconUrl;
+      }
     };
 
-    updateIcons();
-    
-    // Sometimes browsers refresh the icon after a few seconds, let's double check
-    const timer = setTimeout(updateIcons, 2000);
-    return () => clearTimeout(timer);
+    // 执行初始锁定
+    enforceBlueFavicon();
+
+    // 关键：在最初的 5 秒内，每 500ms 强制锁定一次。
+    // 很多平台会在页面加载后动态注入自己的脚本或 manifest，这能确保我们赢下这场“控制权博弈”。
+    const interval = setInterval(enforceBlueFavicon, 500);
+    const timeout = setTimeout(() => clearInterval(interval), 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [state.siteContent.faviconUrl, location.pathname]);
 
   useEffect(() => {
