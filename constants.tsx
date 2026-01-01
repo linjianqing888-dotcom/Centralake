@@ -12,7 +12,7 @@ export const INITIAL_CONTENT: ContentData = {
   logoUrl: "", 
   faviconUrl: "https://placehold.co/32x32/64748b/ffffff?text=CL", // 初始使用中性灰色，而非强制蓝色
   heroTitle: "The global leader in technology investing",
-  heroSubtitle: "WE ARE CENTRALAKE",
+  heroSubtitle: "CENTRALAKE | Integrating Value",
   heroImageUrl: "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&q=80&w=2000",
   aboutText: "Centralake Capital is the global leader in technology investing, with approximately $100 billion in combined assets under management.",
   strategyTitle: "Our Strategic Vision",

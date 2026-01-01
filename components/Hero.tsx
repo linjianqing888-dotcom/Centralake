@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ContentData } from '../types.ts';
 
@@ -26,7 +25,7 @@ const Hero: React.FC<Props> = ({ content }) => {
       <div className="relative z-10 text-center px-6 animate-fadeIn">
         <div className="max-w-4xl mx-auto">
           <p className="text-[#0066CC] text-xs font-bold uppercase tracking-[0.4em] mb-8">
-            // Global Private Equity
+            {content.heroSubtitle}
           </p>
           <h1 className="text-4xl md:text-6xl font-serif-elegant font-light text-slate-800 mb-12 leading-tight">
             Advancing the potential of <br/> visionary entrepreneurs
