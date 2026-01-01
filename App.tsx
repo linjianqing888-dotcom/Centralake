@@ -25,6 +25,7 @@ const App: React.FC = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        // 重要：初始化时就持有 faviconUrl，防止 React 首帧渲染与 HTML 脚本产生差异
         return {
           ...parsed,
           currentUser: null 
@@ -61,14 +62,15 @@ const App: React.FC = () => {
 
   /**
    * 极简同步：只在数据发生变动时调用全局函数
+   * 不再添加 v=${Date.now()}，因为这会导致浏览器每次都重新下载图标，造成闪烁
    */
   useEffect(() => {
-    const url = state.siteContent.faviconUrl;
-    if (url && url !== lastFaviconUrl.current) {
+    const currentUrl = state.siteContent.faviconUrl;
+    if (currentUrl && currentUrl !== lastFaviconUrl.current) {
       if ((window as any).__applyCentralakeFavicon) {
-        (window as any).__applyCentralakeFavicon(url);
+        (window as any).__applyCentralakeFavicon(currentUrl);
       }
-      lastFaviconUrl.current = url;
+      lastFaviconUrl.current = currentUrl;
     }
   }, [state.siteContent.faviconUrl]);
 

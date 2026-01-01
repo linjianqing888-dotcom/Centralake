@@ -5,50 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CENTRALAKE | Integrating Value</title>
     
-    <!-- 第一步：物理封锁。用一个无效的 base64 填满所有浏览器可能猜测的图标位置，彻底断开与“绿色花瓣”缓存的联系 -->
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <link rel="shortcut icon" href="data:;base64,iVBORw0KGgo=">
-    <link rel="apple-touch-icon" href="data:;base64,iVBORw0KGgo=">
+    <!-- 1. 物理占位：必须是 head 的第一行，强制锁定 ID -->
+    <link id="centralake-favicon-locked-icon" rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link id="centralake-favicon-locked-shortcut" rel="shortcut icon" href="data:;base64,iVBORw0KGgo=">
 
     <script>
       (function() {
         const STORAGE_KEY = 'centralake_cloud_mock';
-        const FAVICON_ID = 'centralake-favicon-locked';
+        const ICON_ID = 'centralake-favicon-locked-icon';
+        const SHORTCUT_ID = 'centralake-favicon-locked-shortcut';
         
-        // 强效同步函数：确保图标更新是“覆盖式”而非“增删式”，防止中间产生空档导致浏览器回退
+        // 核心同步函数：只在 URL 确实改变时更新，避免因为版本号变动导致的重载闪烁
         window.__applyCentralakeFavicon = function(url) {
           if (!url) return;
-
-          // 强制版本化：利用 URL 长度和内容生成简易 hash，确保每次上传新图都是“全新”的
-          const fingerprint = btoa(url.slice(-20)).replace(/[^a-z0-9]/gi, '');
-          const versionedUrl = url.startsWith('data:') ? url : (url + (url.includes('?') ? '&' : '?') + 'cv=' + fingerprint);
-
-          const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
           
-          rels.forEach(rel => {
-            const id = FAVICON_ID + '-' + rel.replace(' ', '-');
-            let link = document.getElementById(id);
+          const icon = document.getElementById(ICON_ID);
+          const shortcut = document.getElementById(SHORTCUT_ID);
+          
+          // 如果标签被意外删除了（比如被某些插件），重建它们
+          if (!icon || !shortcut) {
+            const newIcon = icon || document.createElement('link');
+            newIcon.id = ICON_ID;
+            newIcon.rel = 'icon';
+            document.head.appendChild(newIcon);
             
-            if (!link) {
-              // 寻找并清理非我族类的标签
-              document.querySelectorAll(`link[rel="${rel}"]`).forEach(el => {
-                if (!el.id.startsWith(FAVICON_ID)) el.remove();
-              });
-              
-              link = document.createElement('link');
-              link.id = id;
-              link.rel = rel;
-              document.head.appendChild(link);
-            }
-            
-            // 只有在真正不同时才修改，避免触发浏览器重新加载闪烁
-            if (link.href !== versionedUrl) {
-              link.href = versionedUrl;
-            }
+            const newShortcut = shortcut || document.createElement('link');
+            newShortcut.id = SHORTCUT_ID;
+            newShortcut.rel = 'shortcut icon';
+            document.head.appendChild(newShortcut);
+          }
+
+          // 直接修改 href，而不是重新创建元素，这能最大程度减少闪烁
+          if (document.getElementById(ICON_ID).href !== url) {
+            document.getElementById(ICON_ID).href = url;
+            document.getElementById(SHORTCUT_ID).href = url;
+          }
+
+          // 清理所有其他可能干扰的图标标签
+          document.querySelectorAll('link[rel*="icon"]').forEach(el => {
+            if (el.id !== ICON_ID && el.id !== SHORTCUT_ID) el.remove();
           });
         };
 
-        // 立即执行：从缓存恢复
+        // 立即尝试从本地存储恢复，争取在浏览器渲染 body 前完成
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
@@ -58,19 +57,18 @@
           }
         } catch (e) {}
 
-        // 强力保卫：禁止任何外部脚本（如 Vercel 注入或残留脚本）改动图标
+        // 强力监控：防止 React 或其他脚本在之后插入新的图标标签
         const observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-              if (node.tagName === 'LINK' && (node.rel.includes('icon') || node.rel.includes('shortcut'))) {
-                if (!node.id.startsWith(FAVICON_ID)) {
-                  node.remove(); 
+              if (node.tagName === 'LINK' && node.rel && node.rel.includes('icon')) {
+                if (node.id !== ICON_ID && node.id !== SHORTCUT_ID) {
+                  node.remove();
                 }
               }
             });
           });
         });
-
         observer.observe(document.head, { childList: true });
       })();
     </script>
