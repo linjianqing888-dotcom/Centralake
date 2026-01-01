@@ -46,34 +46,30 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * SIMPLIFIED FAVICON UPDATE
-   * Directly sets the uploaded image as the site icon without aggressive locking/monitoring.
+   * CLEAN FAVICON MANAGEMENT
+   * Updates the icon whenever siteContent changes.
+   * Targets the same element ID established in the index.html boot script.
    */
   useEffect(() => {
     const faviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
     if (!faviconUrl) return;
 
-    // Find existing link tags or create a new one
-    let link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
-    
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'icon';
-      document.head.appendChild(link);
-    }
+    const updateTag = (id: string, rel: string) => {
+      let link = document.getElementById(id) as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.id = id;
+        link.rel = rel;
+        document.head.appendChild(link);
+      }
+      // Add a small timestamp to the URL to bust browser cache when the file is updated
+      const versionedUrl = faviconUrl.includes('data:') ? faviconUrl : `${faviconUrl}${faviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+      link.href = versionedUrl;
+    };
 
-    // Update the href to the uploaded image
-    link.href = faviconUrl;
+    updateTag('dynamic-favicon', 'icon');
+    updateTag('dynamic-favicon-apple', 'apple-touch-icon');
     
-    // Also update the shortcut icon for broader compatibility
-    let shortcutLink: HTMLLinkElement | null = document.querySelector("link[rel='shortcut icon']");
-    if (!shortcutLink) {
-      shortcutLink = document.createElement('link');
-      shortcutLink.rel = 'shortcut icon';
-      document.head.appendChild(shortcutLink);
-    }
-    shortcutLink.href = faviconUrl;
-
   }, [state.siteContent.faviconUrl]);
 
   useEffect(() => {
