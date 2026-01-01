@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
 import { ApiService } from './services/api.ts';
@@ -28,6 +28,7 @@ const App: React.FC = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
+  const observerRef = useRef<MutationObserver | null>(null);
 
   const silentRefresh = useCallback(async () => {
     try {
@@ -46,64 +47,86 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * PURE CMS FAVICON GUARDIAN
-   * This logic strictly follows the URL provided in the CMS/Database.
-   * It eliminates any hardcoded blue fallbacks.
+   * ATOMIC FAVICON OBSERVER
+   * Uses MutationObserver to detect and instantly kill any third-party icon injections.
    */
   useEffect(() => {
-    // 优先使用云端/数据库中的 URL，如果没有则使用 INITIAL_CONTENT 的默认（通常也是您上传后的 URL）
     const targetUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
-    
-    // 如果没有任何 URL，则跳过，不强制注入蓝色图标
     if (!targetUrl) return;
 
-    // 增加随机版本号，强制浏览器重新抓取您上传的图片，跳过任何名为 "favicon.ico" 的本地缓存
+    // Use a high-entropy version key to bypass browser and platform caches
     const versionedUrl = targetUrl.startsWith('data:') 
       ? targetUrl 
-      : `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}refresh=${Date.now()}`;
+      : `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}v-lock=${Date.now()}`;
 
     const enforceIcon = () => {
-      // 1. 清理所有不是由我们控制的图标标签（防止 Vercel/环境 自动注入绿色图标）
-      const links = document.querySelectorAll('link[rel*="icon"]');
-      links.forEach(link => {
-        if (link.id !== 'centralake-favicon-main' && link.id !== 'centralake-favicon-alt') {
-          link.remove();
+      const head = document.head;
+      let needsUpdate = false;
+
+      // 1. Find all potential icon links
+      const allLinks = head.querySelectorAll('link[rel*="icon"]');
+      
+      allLinks.forEach(link => {
+        const l = link as HTMLLinkElement;
+        // If it's not one of our locked IDs, it's an intruder (like the green Vercel icon)
+        if (l.id !== 'centralake-lock-primary' && l.id !== 'centralake-lock-alt') {
+          l.remove();
+          needsUpdate = true;
+        } else if (l.href !== versionedUrl) {
+          l.href = versionedUrl;
         }
       });
 
-      // 2. 更新或创建主图标标签
-      let main = document.getElementById('centralake-favicon-main') as HTMLLinkElement;
-      if (!main) {
-        main = document.createElement('link');
-        main.id = 'centralake-favicon-main';
-        main.rel = 'icon';
-        document.head.appendChild(main);
-      }
-      if (main.href !== versionedUrl) {
-        main.href = versionedUrl;
+      // 2. Ensure our tags exist
+      let primary = document.getElementById('centralake-lock-primary') as HTMLLinkElement;
+      if (!primary) {
+        primary = document.createElement('link');
+        primary.id = 'centralake-lock-primary';
+        primary.rel = 'icon';
+        primary.type = 'image/png';
+        primary.href = versionedUrl;
+        head.appendChild(primary);
       }
 
-      // 3. 更新或创建备用图标标签（兼容旧浏览器）
-      let alt = document.getElementById('centralake-favicon-alt') as HTMLLinkElement;
+      let alt = document.getElementById('centralake-lock-alt') as HTMLLinkElement;
       if (!alt) {
         alt = document.createElement('link');
-        alt.id = 'centralake-favicon-alt';
+        alt.id = 'centralake-lock-alt';
         alt.rel = 'shortcut icon';
-        document.head.appendChild(alt);
-      }
-      if (alt.href !== versionedUrl) {
         alt.href = versionedUrl;
+        head.appendChild(alt);
       }
     };
 
-    // 立即执行一次
+    // Initial enforcement
     enforceIcon();
 
-    // 在接下来的 10 秒内每秒检查一次，对抗可能出现的“图标回滚”或环境注入
-    const interval = setInterval(enforceIcon, 1000);
-    const timeout = setTimeout(() => clearInterval(interval), 10000);
+    // Set up MutationObserver to watch for head changes (platform injections)
+    if (observerRef.current) observerRef.current.disconnect();
+    
+    observerRef.current = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+          // Check if any link tags were added
+          const addedNodes = Array.from(mutation.addedNodes);
+          const hasIconChange = addedNodes.some(node => 
+            node.nodeName === 'LINK' && (node as HTMLLinkElement).rel.includes('icon')
+          );
+          if (hasIconChange) {
+            enforceIcon();
+          }
+        }
+      }
+    });
+
+    observerRef.current.observe(document.head, { childList: true, subtree: true });
+
+    // Fallback: Check every 500ms for the first 5 seconds just in case the observer misses a direct attribute update
+    const interval = setInterval(enforceIcon, 500);
+    const timeout = setTimeout(() => clearInterval(interval), 5000);
 
     return () => {
+      if (observerRef.current) observerRef.current.disconnect();
       clearInterval(interval);
       clearTimeout(timeout);
     };
