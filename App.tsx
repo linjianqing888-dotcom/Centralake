@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
 import { ApiService } from './services/api.ts';
@@ -41,6 +41,7 @@ const App: React.FC = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
+  const lastFaviconUrl = useRef<string>(state.siteContent.faviconUrl);
 
   const silentRefresh = useCallback(async () => {
     try {
@@ -59,15 +60,15 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * 稳定的 Favicon 同步逻辑
-   * 直接调用 index.html 中定义的全局 forceApply 方法
+   * 极简同步：只在数据发生变动时调用全局函数
    */
   useEffect(() => {
     const url = state.siteContent.faviconUrl;
-    // 只有当 state 里的 URL 有值时才尝试覆盖。
-    // 如果是初始状态的空字符串，则保持 index.html 脚本已经设置好的内容。
-    if (url && (window as any).__applyCentralakeFavicon) {
-      (window as any).__applyCentralakeFavicon(url);
+    if (url && url !== lastFaviconUrl.current) {
+      if ((window as any).__applyCentralakeFavicon) {
+        (window as any).__applyCentralakeFavicon(url);
+      }
+      lastFaviconUrl.current = url;
     }
   }, [state.siteContent.faviconUrl]);
 

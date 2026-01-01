@@ -5,59 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CENTRALAKE | Integrating Value</title>
     
-    <!-- 1. 彻底切断浏览器对默认 /favicon.ico 的联想 -->
+    <!-- 第一步：物理封锁。用一个无效的 base64 填满所有浏览器可能猜测的图标位置，彻底断开与“绿色花瓣”缓存的联系 -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="shortcut icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="apple-touch-icon" href="data:;base64,iVBORw0KGgo=">
 
     <script>
       (function() {
-        // 关键：必须与 App.tsx 和 ApiService 保持绝对一致
         const STORAGE_KEY = 'centralake_cloud_mock';
         const FAVICON_ID = 'centralake-favicon-locked';
         
-        let customUrl = null;
+        // 强效同步函数：确保图标更新是“覆盖式”而非“增删式”，防止中间产生空档导致浏览器回退
+        window.__applyCentralakeFavicon = function(url) {
+          if (!url) return;
+
+          // 强制版本化：利用 URL 长度和内容生成简易 hash，确保每次上传新图都是“全新”的
+          const fingerprint = btoa(url.slice(-20)).replace(/[^a-z0-9]/gi, '');
+          const versionedUrl = url.startsWith('data:') ? url : (url + (url.includes('?') ? '&' : '?') + 'cv=' + fingerprint);
+
+          const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
+          
+          rels.forEach(rel => {
+            const id = FAVICON_ID + '-' + rel.replace(' ', '-');
+            let link = document.getElementById(id);
+            
+            if (!link) {
+              // 寻找并清理非我族类的标签
+              document.querySelectorAll(`link[rel="${rel}"]`).forEach(el => {
+                if (!el.id.startsWith(FAVICON_ID)) el.remove();
+              });
+              
+              link = document.createElement('link');
+              link.id = id;
+              link.rel = rel;
+              document.head.appendChild(link);
+            }
+            
+            // 只有在真正不同时才修改，避免触发浏览器重新加载闪烁
+            if (link.href !== versionedUrl) {
+              link.href = versionedUrl;
+            }
+          });
+        };
+
+        // 立即执行：从缓存恢复
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) {
             const state = JSON.parse(saved);
-            customUrl = state.siteContent && state.siteContent.faviconUrl;
+            const url = state.siteContent && state.siteContent.faviconUrl;
+            if (url) window.__applyCentralakeFavicon(url);
           }
         } catch (e) {}
 
-        // 默认保底图标（如果没有上传，则保持为空，不给浏览器回退的机会）
-        if (!customUrl) return;
-
-        function forceApply(url) {
-          // 移除所有可能存在的冲突标签
-          document.querySelectorAll('link[rel*="icon"]').forEach(el => {
-            if (el.id !== FAVICON_ID) el.remove();
-          });
-
-          let link = document.getElementById(FAVICON_ID);
-          if (!link) {
-            link = document.createElement('link');
-            link.id = FAVICON_ID;
-            link.rel = 'icon';
-            document.head.appendChild(link);
-          }
-          
-          // 增加版本号，强制浏览器跳过缓存中的“绿色花瓣”
-          const separator = url.includes('?') ? '&' : '?';
-          const versionedUrl = url.startsWith('data:') ? url : (url + separator + 'v=force-' + encodeURIComponent(url.slice(-10)));
-          
-          if (link.href !== versionedUrl) {
-            link.href = versionedUrl;
-          }
-        }
-
-        forceApply(customUrl);
-
-        // 强力保卫：禁止任何代码（包括 Vercel 或其他脚本）插入新图标
+        // 强力保卫：禁止任何外部脚本（如 Vercel 注入或残留脚本）改动图标
         const observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
               if (node.tagName === 'LINK' && (node.rel.includes('icon') || node.rel.includes('shortcut'))) {
-                if (node.id !== FAVICON_ID) {
-                  node.remove();
+                if (!node.id.startsWith(FAVICON_ID)) {
+                  node.remove(); 
                 }
               }
             });
@@ -65,9 +72,6 @@
         });
 
         observer.observe(document.head, { childList: true });
-        
-        // 将方法挂载到全局，方便 React 调用，保持逻辑唯一
-        window.__applyCentralakeFavicon = forceApply;
       })();
     </script>
     
@@ -81,33 +85,17 @@
             margin: 0;
             overflow-x: hidden;
         }
-        .font-serif-elegant {
-            font-family: 'Crimson Pro', serif;
-        }
-        .animate-fadeIn {
-            animation: fadeIn 1s ease-out forwards;
-        }
+        .font-serif-elegant { font-family: 'Crimson Pro', serif; }
+        .animate-fadeIn { animation: fadeIn 1s ease-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        #root {
-            min-height: 100vh;
-        }
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f8fafc;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #001226;
-            border-radius: 4px;
-        }
-        ::selection {
-            background-color: #0066CC;
-            color: white;
-        }
+        #root { min-height: 100vh; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #001226; border-radius: 4px; }
+        ::selection { background-color: #0066CC; color: white; }
     </style>
 <script type="importmap">
 {
