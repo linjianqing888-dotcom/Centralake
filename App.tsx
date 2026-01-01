@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
@@ -47,38 +46,44 @@ const App: React.FC = () => {
   }, [silentRefresh]);
 
   /**
-   * SUPERIOR FAVICON GUARDIAN
-   * Fights off platform defaults and ensures CMS-managed icons take precedence.
+   * PURE CMS FAVICON GUARDIAN
+   * This logic strictly follows the URL provided in the CMS/Database.
+   * It eliminates any hardcoded blue fallbacks.
    */
   useEffect(() => {
-    // Priority: Cloud Content > Initial Constant > Base64 Fallback
-    const rawFaviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
+    // 优先使用云端/数据库中的 URL，如果没有则使用 INITIAL_CONTENT 的默认（通常也是您上传后的 URL）
+    const targetUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
     
-    // Add a unique version to the URL to force browser to dump any "green" cache
-    const v = rawFaviconUrl.startsWith('data:') ? '' : (rawFaviconUrl.includes('?') ? '&v=' : '?v=') + Date.now();
-    const finalUrl = rawFaviconUrl + v;
+    // 如果没有任何 URL，则跳过，不强制注入蓝色图标
+    if (!targetUrl) return;
 
-    const lockIcon = () => {
-      // 1. Clear out ANY Link tags that try to set an icon (platform injections)
-      const existingIcons = document.querySelectorAll('link[rel*="icon"]');
-      existingIcons.forEach(tag => {
-        if (tag.id !== 'centralake-favicon-main' && tag.id !== 'centralake-favicon-alt') {
-          tag.remove();
+    // 增加随机版本号，强制浏览器重新抓取您上传的图片，跳过任何名为 "favicon.ico" 的本地缓存
+    const versionedUrl = targetUrl.startsWith('data:') 
+      ? targetUrl 
+      : `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}refresh=${Date.now()}`;
+
+    const enforceIcon = () => {
+      // 1. 清理所有不是由我们控制的图标标签（防止 Vercel/环境 自动注入绿色图标）
+      const links = document.querySelectorAll('link[rel*="icon"]');
+      links.forEach(link => {
+        if (link.id !== 'centralake-favicon-main' && link.id !== 'centralake-favicon-alt') {
+          link.remove();
         }
       });
 
-      // 2. Set/Update our Primary Link tag
+      // 2. 更新或创建主图标标签
       let main = document.getElementById('centralake-favicon-main') as HTMLLinkElement;
       if (!main) {
         main = document.createElement('link');
         main.id = 'centralake-favicon-main';
         main.rel = 'icon';
-        main.type = 'image/png';
         document.head.appendChild(main);
       }
-      main.href = finalUrl;
+      if (main.href !== versionedUrl) {
+        main.href = versionedUrl;
+      }
 
-      // 3. Set/Update Alternative Link tag (for older browser compatibility)
+      // 3. 更新或创建备用图标标签（兼容旧浏览器）
       let alt = document.getElementById('centralake-favicon-alt') as HTMLLinkElement;
       if (!alt) {
         alt = document.createElement('link');
@@ -86,21 +91,23 @@ const App: React.FC = () => {
         alt.rel = 'shortcut icon';
         document.head.appendChild(alt);
       }
-      alt.href = finalUrl;
+      if (alt.href !== versionedUrl) {
+        alt.href = versionedUrl;
+      }
     };
 
-    // Run immediately
-    lockIcon();
+    // 立即执行一次
+    enforceIcon();
 
-    // Re-run periodically during the first few seconds to combat late-injecting scripts
-    const interval = setInterval(lockIcon, 1000);
+    // 在接下来的 10 秒内每秒检查一次，对抗可能出现的“图标回滚”或环境注入
+    const interval = setInterval(enforceIcon, 1000);
     const timeout = setTimeout(() => clearInterval(interval), 10000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [state.siteContent.faviconUrl]); // Re-run when CMS changes the URL
+  }, [state.siteContent.faviconUrl]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

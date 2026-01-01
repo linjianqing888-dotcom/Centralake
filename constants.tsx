@@ -1,4 +1,3 @@
-
 import { ContentData } from './types.ts';
 
 export const COLORS = {
@@ -10,8 +9,8 @@ export const COLORS = {
 };
 
 export const INITIAL_CONTENT: ContentData = {
-  logoUrl: "", // 不再使用图片Logo
-  faviconUrl: "https://placehold.co/32x32/0066CC/ffffff?text=C", 
+  logoUrl: "", 
+  faviconUrl: "https://placehold.co/32x32/64748b/ffffff?text=CL", // 初始使用中性灰色，而非强制蓝色
   heroTitle: "The global leader in technology investing",
   heroSubtitle: "WE ARE CENTRALAKE",
   heroImageUrl: "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&q=80&w=2000",
