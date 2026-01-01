@@ -10,8 +10,9 @@ export const COLORS = {
 
 export const INITIAL_CONTENT: ContentData = {
   logoUrl: "", 
-  // 使用 1x1 透明像素作为绝对保底，确保不会出现 "CL" 或系统默认图标
-  faviconUrl: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+  // 关键：初始值设为空字符串，而不是占位图。
+  // 这样 React 发现是空时就不会去操作 DOM，保留 index.html 脚本设置好的图标。
+  faviconUrl: "",
   heroTitle: "The global leader in technology investing",
   heroSubtitle: "CENTRALAKE | Integrating Value",
   heroImageUrl: "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&q=80&w=2000",

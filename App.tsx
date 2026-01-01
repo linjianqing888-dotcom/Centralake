@@ -19,7 +19,6 @@ import ImpactBlog from './components/ImpactBlog.tsx';
 import NewsRoom from './components/NewsRoom.tsx';
 
 const App: React.FC = () => {
-  // 初始化状态时直接同步本地缓存，确保第一帧渲染不会回退到默认图标
   const [state, setState] = useState<AppState>(() => {
     const STORAGE_KEY = 'centralake_cloud_mock';
     try {
@@ -61,27 +60,15 @@ const App: React.FC = () => {
 
   /**
    * 稳定的 Favicon 同步逻辑
-   * 移除 Date.now()，只有当 URL 真正改变时才操作 DOM
+   * 直接调用 index.html 中定义的全局 forceApply 方法
    */
   useEffect(() => {
-    const faviconUrl = state.siteContent.faviconUrl;
-    if (!faviconUrl) return;
-
-    const syncTag = (id: string) => {
-      const link = document.getElementById(id) as HTMLLinkElement;
-      if (link) {
-        const currentUrl = link.getAttribute('data-managed-url');
-        // 只有当 URL 确实不同时才更新，防止重复触发导致的闪烁
-        if (currentUrl !== faviconUrl) {
-          link.href = faviconUrl;
-          link.setAttribute('data-managed-url', faviconUrl);
-        }
-      }
-    };
-
-    syncTag('centralake-favicon-locked');
-    syncTag('centralake-apple-locked');
-    
+    const url = state.siteContent.faviconUrl;
+    // 只有当 state 里的 URL 有值时才尝试覆盖。
+    // 如果是初始状态的空字符串，则保持 index.html 脚本已经设置好的内容。
+    if (url && (window as any).__applyCentralakeFavicon) {
+      (window as any).__applyCentralakeFavicon(url);
+    }
   }, [state.siteContent.faviconUrl]);
 
   useEffect(() => {

@@ -1,8 +1,7 @@
-
 import { AppState, User, ContentData, ClientData, ContactSubmission } from '../types.ts';
 import { INITIAL_CONTENT, MOCK_CLIENT_DATA } from '../constants.tsx';
 
-const STORAGE_KEY = 'centralake_app_state';
+const STORAGE_KEY = 'centralake_cloud_mock';
 
 const defaultState: AppState = {
   currentUser: null,

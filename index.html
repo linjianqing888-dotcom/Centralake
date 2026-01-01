@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CENTRALAKE | Integrating Value</title>
     
-    <!-- 1. 物理层阻止：防止浏览器在 JS 运行前去请求 /favicon.ico -->
+    <!-- 1. 彻底切断浏览器对默认 /favicon.ico 的联想 -->
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
-    <!-- 2. 图标保镖脚本：极致防闪烁 -->
     <script>
       (function() {
+        // 关键：必须与 App.tsx 和 ApiService 保持绝对一致
         const STORAGE_KEY = 'centralake_cloud_mock';
         const FAVICON_ID = 'centralake-favicon-locked';
-        const APPLE_ID = 'centralake-apple-locked';
         
         let customUrl = null;
         try {
@@ -24,34 +23,41 @@
           }
         } catch (e) {}
 
-        // 默认透明占位符
-        const fallback = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-        const finalUrl = customUrl || fallback;
+        // 默认保底图标（如果没有上传，则保持为空，不给浏览器回退的机会）
+        if (!customUrl) return;
 
-        function injectFavicon(id, rel, url) {
-          let link = document.getElementById(id);
+        function forceApply(url) {
+          // 移除所有可能存在的冲突标签
+          document.querySelectorAll('link[rel*="icon"]').forEach(el => {
+            if (el.id !== FAVICON_ID) el.remove();
+          });
+
+          let link = document.getElementById(FAVICON_ID);
           if (!link) {
             link = document.createElement('link');
-            link.id = id;
-            link.rel = rel;
+            link.id = FAVICON_ID;
+            link.rel = 'icon';
             document.head.appendChild(link);
           }
-          link.href = url;
-          // 标记原始 URL，供 React 比较使用
-          link.setAttribute('data-managed-url', url);
+          
+          // 增加版本号，强制浏览器跳过缓存中的“绿色花瓣”
+          const separator = url.includes('?') ? '&' : '?';
+          const versionedUrl = url.startsWith('data:') ? url : (url + separator + 'v=force-' + encodeURIComponent(url.slice(-10)));
+          
+          if (link.href !== versionedUrl) {
+            link.href = versionedUrl;
+          }
         }
 
-        // 立即注入，不留白
-        injectFavicon(FAVICON_ID, 'icon', finalUrl);
-        injectFavicon(APPLE_ID, 'apple-touch-icon', finalUrl);
+        forceApply(customUrl);
 
-        // 强力观察者：拦截任何第三方（如 Vercel 注入）的图标修改
+        // 强力保卫：禁止任何代码（包括 Vercel 或其他脚本）插入新图标
         const observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
               if (node.tagName === 'LINK' && (node.rel.includes('icon') || node.rel.includes('shortcut'))) {
-                if (node.id !== FAVICON_ID && node.id !== APPLE_ID) {
-                  node.remove(); 
+                if (node.id !== FAVICON_ID) {
+                  node.remove();
                 }
               }
             });
@@ -59,8 +65,9 @@
         });
 
         observer.observe(document.head, { childList: true });
-        // 保持观察，直到页面完全加载
-        window.addEventListener('load', () => setTimeout(() => observer.disconnect(), 2000));
+        
+        // 将方法挂载到全局，方便 React 调用，保持逻辑唯一
+        window.__applyCentralakeFavicon = forceApply;
       })();
     </script>
     
