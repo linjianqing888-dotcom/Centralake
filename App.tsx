@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AppState, User, ContentData, ContactSubmission } from './types.ts';
@@ -46,13 +45,23 @@ const App: React.FC = () => {
     silentRefresh();
   }, [silentRefresh]);
 
-  // Sync Favicon dynamically across all routes
+  // Sync Favicon dynamically with aggressive fallback to prevent browser reverting to defaults
   useEffect(() => {
-    const favicon = document.getElementById('favicon') as HTMLLinkElement;
-    if (favicon && state.siteContent.faviconUrl) {
-      favicon.href = state.siteContent.faviconUrl;
-    }
-  }, [state.siteContent.faviconUrl]);
+    const faviconUrl = state.siteContent.faviconUrl || INITIAL_CONTENT.faviconUrl;
+    
+    // Target specific IDs from index.html
+    const iconIds = ['favicon-icon', 'favicon-shortcut', 'favicon-apple'];
+    iconIds.forEach(id => {
+      const el = document.getElementById(id) as HTMLLinkElement;
+      if (el) el.href = faviconUrl;
+    });
+
+    // Also scan for any dynamically injected or standard link tags
+    const allIconTags = document.querySelectorAll('link[rel*="icon"]');
+    allIconTags.forEach(tag => {
+      (tag as HTMLLinkElement).href = faviconUrl;
+    });
+  }, [state.siteContent.faviconUrl, location.pathname]); // Update on route change as well for robustness
 
   useEffect(() => {
     window.scrollTo(0, 0);
