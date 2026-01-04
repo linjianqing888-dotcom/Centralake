@@ -35,11 +35,12 @@ const Navbar: React.FC<Props> = ({ user, onLogout }) => {
     <header className="w-full bg-white z-50 sticky top-0 border-b border-slate-100">
       <div className="max-w-[1600px] mx-auto pt-10 pb-4 flex flex-col items-center">
         {/* Top: Massive Centered Text Logo */}
-        <Link to="/" className="mb-8">
+        {/* 使用原生 a 标签配合 href="/" 实现点击后的完整页面重载 */}
+        <a href="/" className="mb-8 block">
           <span className="text-[#001226] text-5xl md:text-6xl font-serif-elegant font-light tracking-[0.1em] uppercase transition-opacity hover:opacity-70">
             Centralake
           </span>
-        </Link>
+        </a>
 
         {/* Bottom: Centered Navigation Row */}
         <nav className="flex items-center gap-6 md:gap-10 flex-wrap justify-center px-4">
